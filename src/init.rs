@@ -8,32 +8,8 @@ use serde_json::{json, Value};
 
 use crate::cli;
 
-const DEFAULT_CONFIG: &str = r#"# Bashguard configuration
-# See: https://github.com/cameronfyfe/bashguard
-
-[profiles]
-# Built-in profiles to activate (run `bashguard profiles install-builtins` first)
-# Examples: "git/read-only", "docker/read-only", "kubectl/read-only"
-builtins = ["general/safe-basics"]
-
-# Custom profile files (relative to ~/.config/bashguard/profiles/)
-custom = []
-
-[settings]
-# Default action for commands that don't match any rule
-# Options: "allow", "deny", "prompt"
-default_action = "prompt"
-
-# Log all decisions to .bashguard/logs/
-log_decisions = true
-
-# Inline rules (highest priority, evaluated before profiles)
-# [[rules]]
-# program = "rm"
-# flags_present = ["-rf"]
-# action = "deny"
-# message = "Recursive force delete is not allowed"
-"#;
+const DEFAULT_CONFIG: &str = include_str!("./templates/config.toml");
+const OPENCODE_PLUGIN_TEMPLATE: &str = include_str!("./templates/opencodePlugin.ts");
 
 /// Initialize bashguard in the current repository
 pub fn init(args: cli::init::Args) -> Result<()> {
@@ -194,46 +170,3 @@ fn init_opencode(cwd: &Path) -> Result<()> {
 
     Ok(())
 }
-
-const OPENCODE_PLUGIN_TEMPLATE: &str = r#"import type { Plugin } from "@opencode-ai/plugin"
-import { execSync } from "child_process"
-
-export const BashguardPlugin: Plugin = async () => {
-  return {
-    "tool.execute.before": async (input, output) => {
-      // Only intercept bash tool calls
-      if (input.tool !== "bash") return
-
-      const command = output.args?.command
-      if (!command) return
-
-      try {
-        // Call bashguard check with OpenCode format
-        const result = execSync("bashguard check --json --format opencode", {
-          input: JSON.stringify({
-            session_id: input.sessionID || "opencode-session",
-            tool_input: { command }
-          }),
-          encoding: "utf-8",
-          timeout: 5000
-        })
-
-        const decision = JSON.parse(result)
-
-        if (decision.abort) {
-          throw new Error(`[bashguard] ${decision.abort}`)
-        }
-      } catch (error: any) {
-        // Re-throw bashguard denials
-        if (error?.message?.startsWith("[bashguard]")) {
-          throw error
-        }
-        // On other errors, log and allow (fail-open for usability)
-        console.error("[bashguard] Error:", error)
-      }
-    }
-  }
-}
-
-export default BashguardPlugin
-"#;

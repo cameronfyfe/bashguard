@@ -1,0 +1,25 @@
+# Bashguard configuration
+# See: https://github.com/cameronfyfe/bashguard
+
+[profiles]
+# Built-in profiles to activate (run `bashguard profiles install-builtins` first)
+# Examples: "git/read-only", "docker/read-only", "kubectl/read-only"
+builtins = ["general/safe-basics"]
+
+# Custom profile files (relative to ~/.config/bashguard/profiles/)
+custom = []
+
+[settings]
+# Default action for commands that don't match any rule
+# Options: "allow", "deny", "prompt"
+default_action = "prompt"
+
+# Log all decisions to .bashguard/logs/
+log_decisions = true
+
+# Inline rules (highest priority, evaluated before profiles)
+# [[rules]]
+# program = "rm"
+# flags_present = ["-rf"]
+# action = "deny"
+# message = "Recursive force delete is not allowed"

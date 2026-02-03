@@ -6,5 +6,6 @@ use crate::cli::Tool;
 #[derive(Clone, Debug, Parser)]
 pub struct Args {
     /// Target tool to integrate with (required)
+    #[clap(short, long)]
     pub tool: Tool,
 }
