@@ -73,9 +73,9 @@ pub fn init() -> Result<()> {
 }
 
 fn update_claude_settings(settings_path: &PathBuf) -> Result<()> {
-    let bashguard_hook = json!({
-        "type": "command",
-        "command": "bashguard check --json"
+    let bashguard_hook_entry = json!({
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "bashguard check --json" }]
     });
 
     let mut settings: Value = if settings_path.exists() {
@@ -87,46 +87,62 @@ fn update_claude_settings(settings_path: &PathBuf) -> Result<()> {
         json!({})
     };
 
-    // Ensure hooks object exists
-    if settings.get("hooks").is_none() {
+    // Get or create hooks object with PreToolUse array
+    let hooks = settings.get_mut("hooks").and_then(|h| h.as_object_mut());
+
+    // Check if bashguard hook already exists in PreToolUse
+    let has_bashguard = hooks
+        .as_ref()
+        .and_then(|h| h.get("PreToolUse"))
+        .and_then(|arr| arr.as_array())
+        .map(|arr| {
+            arr.iter().any(|entry| {
+                entry
+                    .get("hooks")
+                    .and_then(|h| h.as_array())
+                    .map(|hooks| {
+                        hooks.iter().any(|hook| {
+                            hook.get("command")
+                                .and_then(|c| c.as_str())
+                                .map(|c| c.contains("bashguard"))
+                                .unwrap_or(false)
+                        })
+                    })
+                    .unwrap_or(false)
+            })
+        })
+        .unwrap_or(false);
+
+    if has_bashguard {
+        println!("Hook already configured: {}", settings_path.display());
+        return Ok(());
+    }
+
+    // Initialize hooks structure if needed
+    if !settings.get("hooks").map(|h| h.is_object()).unwrap_or(false) {
         settings["hooks"] = json!({});
     }
 
-    // Check if PreToolUse hook already exists
-    let hooks = settings["hooks"].as_object_mut().unwrap();
+    // Get or create PreToolUse array
+    let hooks_obj = settings["hooks"].as_object_mut().unwrap();
+    let is_new = !hooks_obj.contains_key("PreToolUse");
 
-    if let Some(existing) = hooks.get("PreToolUse") {
-        // Check if it's already configured for bashguard
-        if let Some(arr) = existing.as_array() {
-            let has_bashguard = arr.iter().any(|h| {
-                h.get("command")
-                    .and_then(|c| c.as_str())
-                    .map(|c| c.contains("bashguard"))
-                    .unwrap_or(false)
-            });
+    if is_new {
+        hooks_obj.insert("PreToolUse".to_string(), json!([]));
+    }
 
-            if has_bashguard {
-                println!("Hook already configured: {}", settings_path.display());
-                return Ok(());
-            }
+    // Add bashguard hook entry to PreToolUse array
+    let pre_tool_use = hooks_obj
+        .get_mut("PreToolUse")
+        .unwrap()
+        .as_array_mut()
+        .unwrap();
+    pre_tool_use.push(bashguard_hook_entry);
 
-            // Add bashguard to existing hooks
-            let mut new_hooks = arr.clone();
-            new_hooks.push(bashguard_hook);
-            hooks.insert("PreToolUse".to_string(), Value::Array(new_hooks));
-        } else {
-            // Single hook exists, convert to array
-            let existing_hook = existing.clone();
-            hooks.insert(
-                "PreToolUse".to_string(),
-                json!([existing_hook, bashguard_hook]),
-            );
-        }
-        println!("Updated hook in: {}", settings_path.display());
-    } else {
-        // No PreToolUse hook, create new one
-        hooks.insert("PreToolUse".to_string(), json!([bashguard_hook]));
+    if is_new {
         println!("Created hook in: {}", settings_path.display());
+    } else {
+        println!("Updated hook in: {}", settings_path.display());
     }
 
     // Write updated settings
