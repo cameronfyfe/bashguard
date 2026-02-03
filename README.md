@@ -1,5 +1,8 @@
 # bashguard
 
+[![Crates.io](https://img.shields.io/crates/v/bashguard.svg)](https://crates.io/crates/bashguard)
+[![CI](https://github.com/cameronfyfe/bashguard/actions/workflows/main.yaml/badge.svg)](https://github.com/cameronfyfe/bashguard/actions/workflows/main.yaml)
+
 `bashguard` is a simple guardrail system for bash calls from your coding agents.
 
 # Quick Start
