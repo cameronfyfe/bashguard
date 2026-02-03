@@ -1,6 +1,14 @@
+use std::{fmt, str::FromStr};
+
 use clap::{Parser, Subcommand};
 
-#[derive(Parser)]
+pub mod check;
+pub mod init;
+pub mod profiles;
+pub mod test;
+pub mod validate;
+
+#[derive(Clone, Debug, Parser)]
 #[command(name = "bashguard")]
 #[command(about = "Rule-based permission control for Claude Code and OpenCode bash commands")]
 pub struct Cli {
@@ -8,41 +16,41 @@ pub struct Cli {
     pub command: Command,
 }
 
-#[derive(Subcommand)]
+#[derive(Clone, Debug, Subcommand)]
 pub enum Command {
-    /// Initialize bashguard in the current repository
-    Init {
-        /// Target tool to integrate with (required): "claude" or "opencode"
-        #[clap(long)]
-        tool: String,
-    },
-    /// Check a command against current rules (reads from stdin, used by hooks)
-    Check {
-        /// Output in JSON format
-        #[clap(long)]
-        json: bool,
-
-        /// Output format (required): "claude" or "opencode"
-        #[clap(long)]
-        format: String,
-    },
-    /// Validate current configuration files
-    Validate,
-    /// Manage profiles
-    Profiles {
-        #[command(subcommand)]
-        command: ProfilesCommand,
-    },
-    /// Test a command against current rules
-    Test {
-        /// The command to test
-        #[clap(short, long)]
-        command: String,
-    },
+    Init(init::Args),
+    Check(check::Args),
+    Validate(validate::Args),
+    Profiles(profiles::Args),
+    Test(test::Args),
 }
 
-#[derive(Subcommand)]
-pub enum ProfilesCommand {
-    /// Copy built-in profiles to ~/.config/bashguard/profiles/builtins
-    InstallBuiltins,
+#[derive(Clone, Debug)]
+pub enum Tool {
+    Claude,
+    OpenCode,
+}
+
+impl FromStr for Tool {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "claude" => Ok(Tool::Claude),
+            "opencode" => Ok(Tool::OpenCode),
+            _ => Err(format!(
+                "Invalid tool: '{}'. Must be 'claude' or 'opencode'.",
+                s
+            )),
+        }
+    }
+}
+
+impl fmt::Display for Tool {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Tool::Claude => write!(f, "claude"),
+            Tool::OpenCode => write!(f, "opencode"),
+        }
+    }
 }

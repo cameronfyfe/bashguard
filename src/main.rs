@@ -5,7 +5,7 @@ use std::{
 
 use anyhow::{Context, Result};
 use bashguard::{
-    cli::{Cli, Command, ProfilesCommand},
+    cli::{self, Cli, Command},
     Config, Decision, Evaluator, ParsedCommand, SessionLogger,
 };
 use clap::Parser;
@@ -18,13 +18,11 @@ fn main() {
     let cli = Cli::parse();
 
     let result = match cli.command {
-        Command::Init { tool } => init::init(&tool),
-        Command::Check { json, format } => check(json, &format),
-        Command::Validate => validate(),
-        Command::Profiles { command } => match command {
-            ProfilesCommand::InstallBuiltins => profiles::install_builtins(),
-        },
-        Command::Test { command } => test(&command),
+        Command::Init(args) => init::init(args),
+        Command::Check(args) => check(args),
+        Command::Validate(args) => validate(args),
+        Command::Profiles(args) => profiles(args),
+        Command::Test(args) => test(args),
     };
 
     if let Err(e) = result {
@@ -33,14 +31,8 @@ fn main() {
     }
 }
 
-fn check(json_output: bool, format: &str) -> Result<()> {
-    // Validate format parameter
-    if format != "claude" && format != "opencode" {
-        anyhow::bail!(
-            "Invalid format: '{}'. Must be 'claude' or 'opencode'.",
-            format
-        );
-    }
+fn check(args: cli::check::Args) -> Result<()> {
+    let cli::check::Args { json, format } = args;
 
     let stdin = io::stdin();
     let input: String = stdin
@@ -79,10 +71,10 @@ fn check(json_output: bool, format: &str) -> Result<()> {
         }
     }
 
-    if json_output {
+    if json {
         let output = match format {
-            "opencode" => format_opencode_output(&decision),
-            _ => format_claude_code_output(&decision),
+            cli::Tool::Claude => format_claude_code_output(&decision),
+            cli::Tool::OpenCode => format_opencode_output(&decision),
         };
         println!("{}", serde_json::to_string(&output)?);
     } else {
@@ -132,7 +124,9 @@ fn format_opencode_output(decision: &Decision) -> Value {
     }
 }
 
-fn validate() -> Result<()> {
+fn validate(args: cli::validate::Args) -> Result<()> {
+    let _ = args;
+
     Config::load()?;
 
     println!("Configuration is valid.");
@@ -140,10 +134,18 @@ fn validate() -> Result<()> {
     Ok(())
 }
 
-fn test(command: &str) -> Result<()> {
+fn profiles(args: cli::profiles::Args) -> Result<()> {
+    match args.command {
+        cli::profiles::Command::InstallBuiltins(args) => profiles::install_builtins(args),
+    }
+}
+
+fn test(args: cli::test::Args) -> Result<()> {
+    let cli::test::Args { command } = args;
+
     let config = Config::load()?;
     // Parse ALL commands in the input
-    let parsed_commands = ParsedCommand::parse_all(command)?;
+    let parsed_commands = ParsedCommand::parse_all(&command)?;
     let evaluator = Evaluator::new(&config);
     // Evaluate ALL commands
     let (decision, matched_rule) = evaluator.evaluate_all_with_trace(&parsed_commands);

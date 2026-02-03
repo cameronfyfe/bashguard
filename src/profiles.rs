@@ -1,6 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use anyhow::{Context, Result};
+use bashguard::cli;
 
 /// Embedded built-in profiles
 const BUILTIN_PROFILES: &[(&str, &str)] = &[
@@ -31,7 +32,9 @@ const BUILTIN_PROFILES: &[(&str, &str)] = &[
 ];
 
 /// Install built-in profiles to ~/.config/bashguard/profiles/builtins
-pub fn install_builtins() -> Result<()> {
+pub fn install_builtins(args: cli::profiles::install_builtins::Args) -> Result<()> {
+    let _ = args;
+
     let home = std::env::var("HOME").context("HOME environment variable not set")?;
     let builtins_dir = PathBuf::from(&home)
         .join(".config")

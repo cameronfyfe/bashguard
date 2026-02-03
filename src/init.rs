@@ -6,6 +6,8 @@ use std::{
 use anyhow::{bail, Context, Result};
 use serde_json::{json, Value};
 
+use crate::cli;
+
 const DEFAULT_CONFIG: &str = r#"# Bashguard configuration
 # See: https://github.com/cameronfyfe/bashguard
 
@@ -34,11 +36,8 @@ log_decisions = true
 "#;
 
 /// Initialize bashguard in the current repository
-pub fn init(tool: &str) -> Result<()> {
-    // Validate tool parameter
-    if tool != "claude" && tool != "opencode" {
-        bail!("Invalid tool: '{}'. Must be 'claude' or 'opencode'.", tool);
-    }
+pub fn init(args: cli::init::Args) -> Result<()> {
+    let cli::init::Args { tool } = args;
 
     let cwd = env::current_dir().context("Failed to get current directory")?;
 
@@ -68,12 +67,11 @@ pub fn init(tool: &str) -> Result<()> {
 
     // Tool-specific initialization
     match tool {
-        "claude" => init_claude_code(&cwd)?,
-        "opencode" => init_opencode(&cwd)?,
-        _ => unreachable!(),
+        cli::Tool::Claude => init_claude_code(&cwd)?,
+        cli::Tool::OpenCode => init_opencode(&cwd)?,
     }
 
-    println!("\nBashguard initialized successfully for {}!", tool);
+    println!("\nBashguard initialized successfully for {tool}!");
     println!("\nNext steps:");
     println!("  1. Install built-in profiles: bashguard profiles install-builtins");
     println!("  2. Edit .bashguard/config.toml to configure rules");
