@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "bashguard")]
-#[command(about = "Rule-based permission control for Claude Code bash commands")]
+#[command(about = "Rule-based permission control for Claude Code and OpenCode bash commands")]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Command,
@@ -11,12 +11,20 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Command {
     /// Initialize bashguard in the current repository
-    Init,
-    /// Check a command against current rules (reads from stdin, used by Claude Code hook)
+    Init {
+        /// Target tool to integrate with (required): "claude" or "opencode"
+        #[clap(long)]
+        tool: String,
+    },
+    /// Check a command against current rules (reads from stdin, used by hooks)
     Check {
         /// Output in JSON format
         #[clap(long)]
         json: bool,
+
+        /// Output format (required): "claude" or "opencode"
+        #[clap(long)]
+        format: String,
     },
     /// Validate current configuration files
     Validate,

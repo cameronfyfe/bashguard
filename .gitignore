@@ -1,4 +1,7 @@
+/.bashguard/
 /.claude/
+/.opencode/
+
 /target/
 /tmp/
 /result

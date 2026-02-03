@@ -51,8 +51,7 @@ impl SessionLogger {
     pub fn new() -> Self {
         let log_dir = std::env::current_dir()
             .unwrap_or_else(|_| PathBuf::from("."))
-            .join(".claude")
-            .join("bashguard")
+            .join(".bashguard")
             .join("logs");
 
         Self { log_dir }

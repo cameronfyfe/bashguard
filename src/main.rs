@@ -18,8 +18,8 @@ fn main() {
     let cli = Cli::parse();
 
     let result = match cli.command {
-        Command::Init => init::init(),
-        Command::Check { json } => check(json),
+        Command::Init { tool } => init::init(&tool),
+        Command::Check { json, format } => check(json, &format),
         Command::Validate => validate(),
         Command::Profiles { command } => match command {
             ProfilesCommand::InstallBuiltins => profiles::install_builtins(),
@@ -33,7 +33,15 @@ fn main() {
     }
 }
 
-fn check(json_output: bool) -> Result<()> {
+fn check(json_output: bool, format: &str) -> Result<()> {
+    // Validate format parameter
+    if format != "claude" && format != "opencode" {
+        anyhow::bail!(
+            "Invalid format: '{}'. Must be 'claude' or 'opencode'.",
+            format
+        );
+    }
+
     let stdin = io::stdin();
     let input: String = stdin
         .lock()
@@ -72,28 +80,9 @@ fn check(json_output: bool) -> Result<()> {
     }
 
     if json_output {
-        let output = match &decision {
-            Decision::Allow => serde_json::json!({
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": "allow",
-                    "permissionDecisionReason": "Allowed by bashguard rules"
-                }
-            }),
-            Decision::Deny { message } => serde_json::json!({
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": "deny",
-                    "permissionDecisionReason": message
-                }
-            }),
-            Decision::Prompt { message } => serde_json::json!({
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": "ask",
-                    "permissionDecisionReason": message
-                }
-            }),
+        let output = match format {
+            "opencode" => format_opencode_output(&decision),
+            _ => format_claude_code_output(&decision),
         };
         println!("{}", serde_json::to_string(&output)?);
     } else {
@@ -105,6 +94,42 @@ fn check(json_output: bool) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn format_claude_code_output(decision: &Decision) -> Value {
+    match decision {
+        Decision::Allow => serde_json::json!({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "permissionDecisionReason": "Allowed by bashguard rules"
+            }
+        }),
+        Decision::Deny { message } => serde_json::json!({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": message
+            }
+        }),
+        Decision::Prompt { message } => serde_json::json!({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "ask",
+                "permissionDecisionReason": message
+            }
+        }),
+    }
+}
+
+fn format_opencode_output(decision: &Decision) -> Value {
+    match decision {
+        Decision::Allow => serde_json::json!({ "allow": true }),
+        Decision::Deny { message } => serde_json::json!({ "abort": message }),
+        Decision::Prompt { message } => serde_json::json!({
+            "abort": format!("[Requires approval] {}", message)
+        }),
+    }
 }
 
 fn validate() -> Result<()> {

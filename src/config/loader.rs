@@ -14,11 +14,11 @@ pub struct ConfigLoader {
 
 impl ConfigLoader {
     /// Create a new config loader with default paths
-    /// - Config: .claude/bashguard.toml (in current workspace)
+    /// - Config: .bashguard/config.toml (in current workspace)
     /// - Profiles: ~/.config/bashguard/profiles/builtins/
     pub fn new() -> Result<Self> {
         let cwd = std::env::current_dir().context("Failed to get current directory")?;
-        let config_dir = cwd.join(".claude");
+        let config_dir = cwd.join(".bashguard");
 
         let home = std::env::var("HOME").context("HOME environment variable not set")?;
         let profiles_dir = PathBuf::from(home)
@@ -43,7 +43,7 @@ impl ConfigLoader {
 
     /// Load the main configuration and all referenced profiles
     pub fn load(&self) -> Result<Config> {
-        let config_path = self.config_dir.join("bashguard.toml");
+        let config_path = self.config_dir.join("config.toml");
 
         let mut config = if config_path.exists() {
             let contents = fs::read_to_string(&config_path).with_context(|| {
