@@ -58,7 +58,7 @@ pub fn install_builtins() -> Result<()> {
     }
 
     println!("\nBuilt-in profiles installed successfully.");
-    println!("Add them to your config.toml profiles list to activate them.");
+    println!("Add them to your bashguard.toml profiles list to activate them.");
     println!("Example:");
     println!("[profiles]");
     println!("builtins = [\"git/read-only\"]");

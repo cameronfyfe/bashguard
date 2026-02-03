@@ -45,13 +45,12 @@ pub fn init() -> Result<()> {
         );
     }
 
-    // Create .claude/bashguard directory
-    let bashguard_dir = claude_dir.join("bashguard");
-    fs::create_dir_all(&bashguard_dir)
-        .with_context(|| format!("Failed to create directory: {}", bashguard_dir.display()))?;
+    // Create .claude directory
+    fs::create_dir_all(&claude_dir)
+        .with_context(|| format!("Failed to create directory: {}", claude_dir.display()))?;
 
-    // Create config.toml
-    let config_path = bashguard_dir.join("config.toml");
+    // Create bashguard.toml
+    let config_path = claude_dir.join("bashguard.toml");
     if config_path.exists() {
         println!("Config already exists: {}", config_path.display());
     } else {
@@ -67,7 +66,7 @@ pub fn init() -> Result<()> {
     println!("\nBashguard initialized successfully!");
     println!("\nNext steps:");
     println!("  1. Install built-in profiles: bashguard profiles install-builtins");
-    println!("  2. Edit .claude/bashguard/config.toml to configure rules");
+    println!("  2. Edit .claude/bashguard.toml to configure rules");
 
     Ok(())
 }
