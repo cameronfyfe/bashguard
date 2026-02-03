@@ -1,0 +1,221 @@
+[profile]
+name = "general/safe-basics"
+description = "Allow common safe commands"
+
+# Safe read-onlyish commands
+[[rules]]
+program = "ls"
+action = "allow"
+
+[[rules]]
+program = "cat"
+action = "allow"
+
+[[rules]]
+program = "head"
+action = "allow"
+
+[[rules]]
+program = "tail"
+action = "allow"
+
+[[rules]]
+program = "less"
+action = "allow"
+
+[[rules]]
+program = "more"
+action = "allow"
+
+[[rules]]
+program = "grep"
+action = "allow"
+
+[[rules]]
+program = "rg"
+action = "allow"
+
+[[rules]]
+# TODO: filter out -exec and -delete options
+program = "find"
+action = "allow"
+
+[[rules]]
+program = "fd"
+action = "allow"
+
+[[rules]]
+program = "echo"
+action = "allow"
+
+[[rules]]
+program = "printf"
+action = "allow"
+
+[[rules]]
+program = "pwd"
+action = "allow"
+
+[[rules]]
+program = "which"
+action = "allow"
+
+[[rules]]
+program = "whereis"
+action = "allow"
+
+[[rules]]
+program = "whoami"
+action = "allow"
+
+[[rules]]
+program = "id"
+action = "allow"
+
+[[rules]]
+program = "date"
+action = "allow"
+
+[[rules]]
+program = "cal"
+action = "allow"
+
+[[rules]]
+program = "file"
+action = "allow"
+
+[[rules]]
+program = "wc"
+action = "allow"
+
+[[rules]]
+program = "stat"
+action = "allow"
+
+[[rules]]
+program = "du"
+action = "allow"
+
+[[rules]]
+program = "df"
+action = "allow"
+
+[[rules]]
+program = "env"
+action = "allow"
+
+[[rules]]
+program = "printenv"
+action = "allow"
+
+[[rules]]
+program = "uname"
+action = "allow"
+
+[[rules]]
+program = "hostname"
+action = "allow"
+
+[[rules]]
+program = "uptime"
+action = "allow"
+
+[[rules]]
+program = "ps"
+action = "allow"
+
+[[rules]]
+program = "top"
+action = "allow"
+
+[[rules]]
+program = "htop"
+action = "allow"
+
+[[rules]]
+program = "free"
+action = "allow"
+
+[[rules]]
+program = "lsof"
+action = "allow"
+
+[[rules]]
+program = "netstat"
+action = "allow"
+
+[[rules]]
+program = "ss"
+action = "allow"
+
+[[rules]]
+program = "ping"
+action = "allow"
+
+[[rules]]
+program = "dig"
+action = "allow"
+
+[[rules]]
+program = "nslookup"
+action = "allow"
+
+[[rules]]
+program = "host"
+action = "allow"
+
+[[rules]]
+program = "tree"
+action = "allow"
+
+[[rules]]
+program = "realpath"
+action = "allow"
+
+[[rules]]
+program = "dirname"
+action = "allow"
+
+[[rules]]
+program = "basename"
+action = "allow"
+
+[[rules]]
+program = "sort"
+action = "allow"
+
+[[rules]]
+program = "uniq"
+action = "allow"
+
+[[rules]]
+program = "cut"
+action = "allow"
+
+[[rules]]
+program = "tr"
+action = "allow"
+
+[[rules]]
+program = "diff"
+action = "allow"
+
+[[rules]]
+program = "comm"
+action = "allow"
+
+[[rules]]
+program = "jq"
+action = "allow"
+
+[[rules]]
+program = "yq"
+action = "allow"
+
+[[rules]]
+program = "xargs"
+action = "allow"
+
+[[rules]]
+program = "tee"
+action = "allow"

@@ -1,0 +1,329 @@
+[profile]
+name = "kubectl/read-only"
+description = "Allow read-only kubectl operations, deny mutations"
+
+# Read-only commands
+[[rules]]
+program = "kubectl"
+subcommands = ["get"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["describe"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["logs"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["top"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["explain"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["api-resources"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["api-versions"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["version"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["cluster-info"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["diff"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["wait"]
+action = "allow"
+
+# Config read operations
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "view"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "get-contexts"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "current-context"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "get-clusters"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "get-users"]
+action = "allow"
+
+# Auth check (read-only)
+[[rules]]
+program = "kubectl"
+subcommands = ["auth", "can-i"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["auth", "whoami"]
+action = "allow"
+
+# Rollout status is read-only
+[[rules]]
+program = "kubectl"
+subcommands = ["rollout", "status"]
+action = "allow"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["rollout", "history"]
+action = "allow"
+
+# Deny config mutations
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "set"]
+action = "deny"
+message = "Config set blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "set-context"]
+action = "deny"
+message = "Config set-context blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "set-cluster"]
+action = "deny"
+message = "Config set-cluster blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "set-credentials"]
+action = "deny"
+message = "Config set-credentials blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "use-context"]
+action = "deny"
+message = "Config use-context blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "delete-context"]
+action = "deny"
+message = "Config delete-context blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "delete-cluster"]
+action = "deny"
+message = "Config delete-cluster blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["config", "delete-user"]
+action = "deny"
+message = "Config delete-user blocked by kubectl/read-only profile"
+
+# Deny rollout mutations
+[[rules]]
+program = "kubectl"
+subcommands = ["rollout", "restart"]
+action = "deny"
+message = "Rollout restart blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["rollout", "undo"]
+action = "deny"
+message = "Rollout undo blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["rollout", "pause"]
+action = "deny"
+message = "Rollout pause blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["rollout", "resume"]
+action = "deny"
+message = "Rollout resume blocked by kubectl/read-only profile"
+
+# Deny resource mutations
+[[rules]]
+program = "kubectl"
+subcommands = ["apply"]
+action = "deny"
+message = "Apply blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["create"]
+action = "deny"
+message = "Create blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["delete"]
+action = "deny"
+message = "Delete blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["edit"]
+action = "deny"
+message = "Edit blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["patch"]
+action = "deny"
+message = "Patch blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["replace"]
+action = "deny"
+message = "Replace blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["scale"]
+action = "deny"
+message = "Scale blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["autoscale"]
+action = "deny"
+message = "Autoscale blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["expose"]
+action = "deny"
+message = "Expose blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["run"]
+action = "deny"
+message = "Run blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["set"]
+action = "deny"
+message = "Set blocked by kubectl/read-only profile"
+
+# Deny node operations
+[[rules]]
+program = "kubectl"
+subcommands = ["cordon"]
+action = "deny"
+message = "Cordon blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["uncordon"]
+action = "deny"
+message = "Uncordon blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["drain"]
+action = "deny"
+message = "Drain blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["taint"]
+action = "deny"
+message = "Taint blocked by kubectl/read-only profile"
+
+# Deny metadata mutations
+[[rules]]
+program = "kubectl"
+subcommands = ["label"]
+action = "deny"
+message = "Label blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["annotate"]
+action = "deny"
+message = "Annotate blocked by kubectl/read-only profile"
+
+# Deny exec and cp (potential for changes)
+[[rules]]
+program = "kubectl"
+subcommands = ["exec"]
+action = "deny"
+message = "Exec blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["cp"]
+action = "deny"
+message = "Cp blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["attach"]
+action = "deny"
+message = "Attach blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["port-forward"]
+action = "deny"
+message = "Port-forward blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["proxy"]
+action = "deny"
+message = "Proxy blocked by kubectl/read-only profile"
+
+[[rules]]
+program = "kubectl"
+subcommands = ["debug"]
+action = "deny"
+message = "Debug blocked by kubectl/read-only profile"
+
+# Fallback for other kubectl commands
+[[rules]]
+program = "kubectl"
+action = "prompt"
+message = "Unknown kubectl command requires approval"

@@ -1,0 +1,186 @@
+[profile]
+name = "docker/read-only"
+description = "Allow read-only docker operations, deny container/image mutations"
+
+# Read-only operations
+[[rules]]
+program = "docker"
+subcommands = ["ps"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["images"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["logs"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["inspect"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["info"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["version"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["stats"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["top"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["port"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["events"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["history"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["diff"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["search"]
+action = "allow"
+
+# Docker compose read operations
+[[rules]]
+program = "docker"
+subcommands = ["compose", "ps"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "logs"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "config"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "images"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "top"]
+action = "allow"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "events"]
+action = "allow"
+
+# Prompt for run/exec
+[[rules]]
+program = "docker"
+subcommands = ["run"]
+action = "prompt"
+message = "docker run requires approval"
+
+[[rules]]
+program = "docker"
+subcommands = ["exec"]
+action = "prompt"
+message = "docker exec requires approval"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "run"]
+action = "prompt"
+message = "docker compose run requires approval"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "exec"]
+action = "prompt"
+message = "docker compose exec requires approval"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "up"]
+action = "prompt"
+message = "docker compose up requires approval"
+
+# Deny dangerous operations
+[[rules]]
+program = "docker"
+subcommands = ["rm"]
+action = "deny"
+message = "docker rm blocked by docker/read-only profile"
+
+[[rules]]
+program = "docker"
+subcommands = ["rmi"]
+action = "deny"
+message = "docker rmi blocked by docker/read-only profile"
+
+[[rules]]
+program = "docker"
+subcommands = ["stop"]
+action = "deny"
+message = "docker stop blocked by docker/read-only profile"
+
+[[rules]]
+program = "docker"
+subcommands = ["kill"]
+action = "deny"
+message = "docker kill blocked by docker/read-only profile"
+
+[[rules]]
+program = "docker"
+subcommands = ["prune"]
+action = "deny"
+message = "docker prune blocked by docker/read-only profile"
+
+[[rules]]
+program = "docker"
+subcommands = ["system", "prune"]
+action = "deny"
+message = "docker system prune blocked by docker/read-only profile"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "down"]
+action = "deny"
+message = "docker compose down blocked by docker/read-only profile"
+
+[[rules]]
+program = "docker"
+subcommands = ["compose", "rm"]
+action = "deny"
+message = "docker compose rm blocked by docker/read-only profile"
+
+# Fallback
+[[rules]]
+program = "docker"
+action = "prompt"
+message = "Unknown docker command requires approval"

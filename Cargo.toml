@@ -1,0 +1,21 @@
+[package]
+name = "bashguard"
+version = "0.1.1"
+edition = "2021"
+description = "Rule-based bash guard for your coding agent"
+license = "Apache-2.0"
+repository = "https://github.com/cameronfyfe/bashguard"
+readme = "README.md"
+
+[dependencies]
+anyhow = "1"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive"] }
+glob = "0.3"
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,0 +1,185 @@
+[profile]
+name = "git/read-only"
+description = "Allow read-only git operations, deny mutations"
+
+# Simple read operations
+[[rules]]
+program = "git"
+subcommands = ["status"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["log"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["diff"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["show"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["blame"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["branch"]
+flags_absent = ["-d", "-D", "-m", "-M", "-c", "-C"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["tag"]
+flags_absent = ["-d", "-a", "-s", "-f"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["fetch"]
+action = "allow"
+
+# Remote read operations
+[[rules]]
+program = "git"
+subcommands = ["remote"]
+subcommands_exact = true
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["remote", "show"]
+action = "allow"
+
+[[rules]]
+program = "git"
+subcommands = ["remote", "get-url"]
+action = "allow"
+
+# Deny mutating remote operations
+[[rules]]
+program = "git"
+subcommands = ["remote", "add"]
+action = "deny"
+message = "Adding remotes blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["remote", "remove"]
+action = "deny"
+message = "Removing remotes blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["remote", "rename"]
+action = "deny"
+message = "Renaming remotes blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["remote", "set-url"]
+action = "deny"
+message = "Setting remote URL blocked by git/read-only profile"
+
+# Deny write operations
+[[rules]]
+program = "git"
+subcommands = ["push"]
+action = "deny"
+message = "Push blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["commit"]
+action = "deny"
+message = "Commit blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["merge"]
+action = "deny"
+message = "Merge blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["rebase"]
+action = "deny"
+message = "Rebase blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["reset"]
+action = "deny"
+message = "Reset blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["checkout"]
+action = "deny"
+message = "Checkout blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["switch"]
+action = "deny"
+message = "Switch blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["restore"]
+action = "deny"
+message = "Restore blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["add"]
+action = "deny"
+message = "Staging blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["rm"]
+action = "deny"
+message = "Remove blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["mv"]
+action = "deny"
+message = "Move blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["stash"]
+action = "deny"
+message = "Stash blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["cherry-pick"]
+action = "deny"
+message = "Cherry-pick blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["revert"]
+action = "deny"
+message = "Revert blocked by git/read-only profile"
+
+[[rules]]
+program = "git"
+subcommands = ["clean"]
+action = "deny"
+message = "Clean blocked by git/read-only profile"
+
+# Fallback for other git commands
+[[rules]]
+program = "git"
+action = "prompt"
+message = "Unknown git command requires approval"

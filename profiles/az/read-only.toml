@@ -1,0 +1,541 @@
+[profile]
+name = "az/read-only"
+description = "Allow read-only Azure CLI operations, deny mutations"
+
+# =============================================================================
+# General read-only commands
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["version"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["account", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["account", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["account", "list-locations"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["account", "get-access-token"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["configure", "list-defaults"]
+action = "allow"
+
+# =============================================================================
+# Resource group read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["group", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["group", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["group", "exists"]
+action = "allow"
+
+# =============================================================================
+# Generic resource read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["resource", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["resource", "show"]
+action = "allow"
+
+# =============================================================================
+# Virtual machine read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["vm", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["vm", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["vm", "list-ip-addresses"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["vm", "list-sizes"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["vm", "list-skus"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["vm", "list-usage"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["vm", "get-instance-view"]
+action = "allow"
+
+# =============================================================================
+# Storage read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "account", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "account", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "account", "show-connection-string"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "account", "keys", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "container", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "container", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "blob", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "blob", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["storage", "blob", "exists"]
+action = "allow"
+
+# =============================================================================
+# Network read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["network", "vnet", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "vnet", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "vnet", "subnet", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "vnet", "subnet", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "nsg", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "nsg", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "nsg", "rule", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "nsg", "rule", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "public-ip", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "public-ip", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "nic", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "nic", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "lb", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["network", "lb", "show"]
+action = "allow"
+
+# =============================================================================
+# AKS read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["aks", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["aks", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["aks", "get-credentials"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["aks", "get-versions"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["aks", "nodepool", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["aks", "nodepool", "show"]
+action = "allow"
+
+# =============================================================================
+# Web app / App Service read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["webapp", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["webapp", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["webapp", "config", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["webapp", "config", "appsettings", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["webapp", "log", "tail"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["webapp", "log", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["functionapp", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["functionapp", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["functionapp", "config", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["functionapp", "config", "appsettings", "list"]
+action = "allow"
+
+# =============================================================================
+# SQL read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["sql", "server", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["sql", "server", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["sql", "db", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["sql", "db", "show"]
+action = "allow"
+
+# =============================================================================
+# Key Vault read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "secret", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "secret", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "key", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "key", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "certificate", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["keyvault", "certificate", "show"]
+action = "allow"
+
+# =============================================================================
+# Monitor / Log Analytics read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["monitor", "metrics", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["monitor", "activity-log", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["monitor", "log-analytics", "workspace", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["monitor", "log-analytics", "workspace", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["monitor", "log-analytics", "query"]
+action = "allow"
+
+# =============================================================================
+# AD / IAM read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "user", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "user", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "group", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "group", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "group", "member", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "sp", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "sp", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "app", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["ad", "app", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["role", "assignment", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["role", "definition", "list"]
+action = "allow"
+
+# =============================================================================
+# Container Registry read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["acr", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["acr", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["acr", "repository", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["acr", "repository", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["acr", "repository", "show-tags"]
+action = "allow"
+
+# =============================================================================
+# Cosmos DB read operations
+# =============================================================================
+
+[[rules]]
+program = "az"
+subcommands = ["cosmosdb", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["cosmosdb", "show"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["cosmosdb", "keys", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["cosmosdb", "database", "list"]
+action = "allow"
+
+[[rules]]
+program = "az"
+subcommands = ["cosmosdb", "database", "show"]
+action = "allow"
+
+# =============================================================================
+# Fallback to prompt on any other commands
+# =============================================================================
+[[rules]]
+program = "az"
+action = "prompt"

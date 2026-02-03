@@ -1,0 +1,174 @@
+[profile]
+name = "terraform/read-only"
+description = "Allow read-only terraform operations, deny mutations"
+
+# Read-only commands
+[[rules]]
+program = "terraform"
+subcommands = ["plan"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["show"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["validate"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["version"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["providers"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["graph"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["output"]
+action = "allow"
+
+# fmt with -check is read-only
+[[rules]]
+program = "terraform"
+subcommands = ["fmt"]
+flags_present = ["-check"]
+action = "allow"
+
+# State read operations
+[[rules]]
+program = "terraform"
+subcommands = ["state", "list"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["state", "show"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["state", "pull"]
+action = "allow"
+
+# Workspace read operations
+[[rules]]
+program = "terraform"
+subcommands = ["workspace", "list"]
+action = "allow"
+
+[[rules]]
+program = "terraform"
+subcommands = ["workspace", "show"]
+action = "allow"
+
+# Deny fmt without -check (modifies files)
+[[rules]]
+program = "terraform"
+subcommands = ["fmt"]
+flags_absent = ["-check"]
+action = "deny"
+message = "Format blocked by terraform/read-only profile (use -check for read-only)"
+
+# Deny state mutations
+[[rules]]
+program = "terraform"
+subcommands = ["state", "mv"]
+action = "deny"
+message = "State move blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["state", "rm"]
+action = "deny"
+message = "State remove blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["state", "push"]
+action = "deny"
+message = "State push blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["state", "replace-provider"]
+action = "deny"
+message = "State replace-provider blocked by terraform/read-only profile"
+
+# Deny workspace mutations
+[[rules]]
+program = "terraform"
+subcommands = ["workspace", "new"]
+action = "deny"
+message = "Workspace creation blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["workspace", "delete"]
+action = "deny"
+message = "Workspace deletion blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["workspace", "select"]
+action = "deny"
+message = "Workspace switch blocked by terraform/read-only profile"
+
+# Deny infrastructure mutations
+[[rules]]
+program = "terraform"
+subcommands = ["apply"]
+action = "deny"
+message = "Apply blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["destroy"]
+action = "deny"
+message = "Destroy blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["import"]
+action = "deny"
+message = "Import blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["taint"]
+action = "deny"
+message = "Taint blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["untaint"]
+action = "deny"
+message = "Untaint blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["refresh"]
+action = "deny"
+message = "Refresh blocked by terraform/read-only profile"
+
+[[rules]]
+program = "terraform"
+subcommands = ["init"]
+action = "deny"
+message = "Init blocked by terraform/read-only profile"
+
+# Fallback for other terraform commands
+[[rules]]
+program = "terraform"
+action = "prompt"
+message = "Unknown terraform command requires approval"
