@@ -117,25 +117,25 @@ mod tests {
     #[test]
     fn test_program_match() {
         let rule = make_rule(Some("git"), vec![], Action::Allow);
-        let cmd = ParsedCommand::parse("git status").unwrap();
-        assert!(RuleMatcher::matches(&rule, &cmd));
+        let cmds = ParsedCommand::parse_all("git status").unwrap();
+        assert!(RuleMatcher::matches(&rule, &cmds[0]));
 
-        let cmd2 = ParsedCommand::parse("npm install").unwrap();
-        assert!(!RuleMatcher::matches(&rule, &cmd2));
+        let cmds2 = ParsedCommand::parse_all("npm install").unwrap();
+        assert!(!RuleMatcher::matches(&rule, &cmds2[0]));
     }
 
     #[test]
     fn test_subcommand_prefix_match() {
         let rule = make_rule(Some("git"), vec!["remote"], Action::Allow);
 
-        let cmd1 = ParsedCommand::parse("git remote").unwrap();
-        assert!(RuleMatcher::matches(&rule, &cmd1));
+        let cmds1 = ParsedCommand::parse_all("git remote").unwrap();
+        assert!(RuleMatcher::matches(&rule, &cmds1[0]));
 
-        let cmd2 = ParsedCommand::parse("git remote add origin").unwrap();
-        assert!(RuleMatcher::matches(&rule, &cmd2));
+        let cmds2 = ParsedCommand::parse_all("git remote add origin").unwrap();
+        assert!(RuleMatcher::matches(&rule, &cmds2[0]));
 
-        let cmd3 = ParsedCommand::parse("git status").unwrap();
-        assert!(!RuleMatcher::matches(&rule, &cmd3));
+        let cmds3 = ParsedCommand::parse_all("git status").unwrap();
+        assert!(!RuleMatcher::matches(&rule, &cmds3[0]));
     }
 
     #[test]
@@ -143,11 +143,11 @@ mod tests {
         let mut rule = make_rule(Some("git"), vec!["remote"], Action::Allow);
         rule.subcommands_exact = true;
 
-        let cmd1 = ParsedCommand::parse("git remote").unwrap();
-        assert!(RuleMatcher::matches(&rule, &cmd1));
+        let cmds1 = ParsedCommand::parse_all("git remote").unwrap();
+        assert!(RuleMatcher::matches(&rule, &cmds1[0]));
 
-        let cmd2 = ParsedCommand::parse("git remote add origin").unwrap();
-        assert!(!RuleMatcher::matches(&rule, &cmd2));
+        let cmds2 = ParsedCommand::parse_all("git remote add origin").unwrap();
+        assert!(!RuleMatcher::matches(&rule, &cmds2[0]));
     }
 
     #[test]
@@ -155,11 +155,11 @@ mod tests {
         let mut rule = make_rule(Some("git"), vec!["push"], Action::Deny);
         rule.flags_present = vec!["--force".to_string()];
 
-        let cmd1 = ParsedCommand::parse("git push --force").unwrap();
-        assert!(RuleMatcher::matches(&rule, &cmd1));
+        let cmds1 = ParsedCommand::parse_all("git push --force").unwrap();
+        assert!(RuleMatcher::matches(&rule, &cmds1[0]));
 
-        let cmd2 = ParsedCommand::parse("git push").unwrap();
-        assert!(!RuleMatcher::matches(&rule, &cmd2));
+        let cmds2 = ParsedCommand::parse_all("git push").unwrap();
+        assert!(!RuleMatcher::matches(&rule, &cmds2[0]));
     }
 
     #[test]
@@ -167,14 +167,14 @@ mod tests {
         let mut rule = make_rule(Some("git"), vec!["push"], Action::Allow);
         rule.flags_absent = vec!["--force".to_string(), "-f".to_string()];
 
-        let cmd1 = ParsedCommand::parse("git push").unwrap();
-        assert!(RuleMatcher::matches(&rule, &cmd1));
+        let cmds1 = ParsedCommand::parse_all("git push").unwrap();
+        assert!(RuleMatcher::matches(&rule, &cmds1[0]));
 
-        let cmd2 = ParsedCommand::parse("git push --force").unwrap();
-        assert!(!RuleMatcher::matches(&rule, &cmd2));
+        let cmds2 = ParsedCommand::parse_all("git push --force").unwrap();
+        assert!(!RuleMatcher::matches(&rule, &cmds2[0]));
 
-        let cmd3 = ParsedCommand::parse("git push -f").unwrap();
-        assert!(!RuleMatcher::matches(&rule, &cmd3));
+        let cmds3 = ParsedCommand::parse_all("git push -f").unwrap();
+        assert!(!RuleMatcher::matches(&rule, &cmds3[0]));
     }
 
     #[test]
@@ -182,10 +182,10 @@ mod tests {
         let mut rule = make_rule(Some("rm"), vec![], Action::Deny);
         rule.args_regex = Some(r"/\*".to_string());
 
-        let cmd1 = ParsedCommand::parse("rm -rf /*").unwrap();
-        assert!(RuleMatcher::matches(&rule, &cmd1));
+        let cmds1 = ParsedCommand::parse_all("rm -rf /*").unwrap();
+        assert!(RuleMatcher::matches(&rule, &cmds1[0]));
 
-        let cmd2 = ParsedCommand::parse("rm foo.txt").unwrap();
-        assert!(!RuleMatcher::matches(&rule, &cmd2));
+        let cmds2 = ParsedCommand::parse_all("rm foo.txt").unwrap();
+        assert!(!RuleMatcher::matches(&rule, &cmds2[0]));
     }
 }

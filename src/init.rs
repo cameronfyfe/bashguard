@@ -119,7 +119,11 @@ fn update_claude_settings(settings_path: &PathBuf) -> Result<()> {
     }
 
     // Initialize hooks structure if needed
-    if !settings.get("hooks").map(|h| h.is_object()).unwrap_or(false) {
+    if !settings
+        .get("hooks")
+        .map(|h| h.is_object())
+        .unwrap_or(false)
+    {
         settings["hooks"] = json!({});
     }
 

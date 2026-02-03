@@ -51,19 +51,24 @@ fn check(json_output: bool) -> Result<()> {
         .unwrap_or("unknown-session");
 
     let config = Config::load()?;
-    let parsed = ParsedCommand::parse(command_str)?;
+    // Parse ALL commands in the input (handles pipelines, chains, etc.)
+    let parsed_commands = ParsedCommand::parse_all(command_str)?;
     let evaluator = Evaluator::new(&config);
-    let (decision, matched_rule) = evaluator.evaluate_with_trace(&parsed);
+    // Evaluate ALL commands - strictest decision wins
+    let (decision, matched_rule) = evaluator.evaluate_all_with_trace(&parsed_commands);
 
+    // Log using the first parsed command for display (the raw command is still logged)
     let logger = SessionLogger::new();
-    if let Err(e) = logger.log_action(
-        session_id,
-        command_str,
-        &parsed,
-        &decision,
-        matched_rule.as_ref(),
-    ) {
-        eprintln!("[bashguard] Failed to log action: {}", e);
+    if let Some(first_parsed) = parsed_commands.first() {
+        if let Err(e) = logger.log_action(
+            session_id,
+            command_str,
+            first_parsed,
+            &decision,
+            matched_rule.as_ref(),
+        ) {
+            eprintln!("[bashguard] Failed to log action: {}", e);
+        }
     }
 
     if json_output {
@@ -112,18 +117,28 @@ fn validate() -> Result<()> {
 
 fn test(command: &str) -> Result<()> {
     let config = Config::load()?;
-    let parsed = ParsedCommand::parse(command)?;
+    // Parse ALL commands in the input
+    let parsed_commands = ParsedCommand::parse_all(command)?;
     let evaluator = Evaluator::new(&config);
-    let (decision, matched_rule) = evaluator.evaluate_with_trace(&parsed);
+    // Evaluate ALL commands
+    let (decision, matched_rule) = evaluator.evaluate_all_with_trace(&parsed_commands);
 
     println!("Command: {}", command);
-    println!("\nParsed:");
-    println!("  Program: {}", parsed.program);
-    println!("  Subcommands: {:?}", parsed.subcommands);
-    println!("  Flags: {:?}", parsed.flags);
-    println!("  Args: {:?}", parsed.args);
+    println!("\nParsed ({} command(s)):", parsed_commands.len());
+    for (i, parsed) in parsed_commands.iter().enumerate() {
+        println!("  [{}] Program: {}", i + 1, parsed.program);
+        println!("      Subcommands: {:?}", parsed.subcommands);
+        println!("      Flags: {:?}", parsed.flags);
+        println!("      Args: {:?}", parsed.args);
+        if parsed.has_expansion {
+            println!("      Has expansion: yes");
+        }
+        if parsed.has_substitution {
+            println!("      Has substitution: yes");
+        }
+    }
 
-    println!("\nDecision: {:?}", decision);
+    println!("\nOverall Decision: {:?}", decision);
     if let Some(rule) = matched_rule {
         println!("Matched rule: {:?}", rule);
     } else {

@@ -1,7 +1,7 @@
+mod brush_adapter;
 mod command;
-mod lexer;
 mod semantic;
 
+pub use brush_adapter::parse_with_brush;
 pub use command::ParsedCommand;
-pub use lexer::Lexer;
 pub use semantic::SemanticAnalyzer;

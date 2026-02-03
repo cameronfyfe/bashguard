@@ -9,6 +9,7 @@ readme = "README.md"
 
 [dependencies]
 anyhow = "1"
+brush-parser = "0.3.0"
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
 glob = "0.3"

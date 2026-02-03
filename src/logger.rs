@@ -154,11 +154,12 @@ mod tests {
         let mut logger = SessionLogger::new();
         logger.log_dir = temp_dir.path().to_path_buf();
 
-        let parsed = ParsedCommand::parse("git status").unwrap();
+        let parsed_commands = ParsedCommand::parse_all("git status").unwrap();
+        let parsed = &parsed_commands[0];
         let decision = Decision::Allow;
 
         logger
-            .log_action("test-session", "git status", &parsed, &decision, None)
+            .log_action("test-session", "git status", parsed, &decision, None)
             .unwrap();
 
         let log_path = logger.log_file_path("test-session");

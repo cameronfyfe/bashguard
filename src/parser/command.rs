@@ -1,11 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 
-use super::{
-    lexer::{Lexer, Token},
-    semantic::SemanticAnalyzer,
-};
+use super::brush_adapter::parse_with_brush;
 
 /// A parsed shell command with semantic information
 #[derive(Debug, Clone)]
@@ -26,86 +23,36 @@ pub struct ParsedCommand {
     pub has_redirect: bool,
     /// Environment variables set before the command
     pub env_vars: HashMap<String, String>,
+    /// Whether the command contains parameter expansion ($VAR, ${VAR})
+    pub has_expansion: bool,
+    /// Whether the command contains command substitution ($(...) or backticks)
+    pub has_substitution: bool,
 }
 
 impl ParsedCommand {
-    /// Parse a command string into a ParsedCommand
+    /// Parse a command string and return ALL commands found.
+    ///
+    /// This extracts all commands from pipelines (`cmd1 | cmd2`), chains (`cmd1 && cmd2`),
+    /// and nested structures like subshells. This is the recommended method for security
+    /// evaluation as it prevents bypass via: `allowed-cmd | blocked-cmd`.
+    pub fn parse_all(command: &str) -> Result<Vec<Self>> {
+        parse_with_brush(command)
+    }
+
+    /// Parse a command string into a single ParsedCommand.
+    ///
+    /// **Note:** This only returns the first command found. For security evaluation,
+    /// use `parse_all()` to evaluate all commands in pipelines and chains.
+    #[deprecated(
+        since = "0.2.0",
+        note = "Use parse_all() to evaluate all commands in pipelines and chains"
+    )]
     pub fn parse(command: &str) -> Result<Self> {
-        let mut lexer = Lexer::new(command);
-        let tokens = lexer.tokenize()?;
-
-        if tokens.is_empty() {
-            bail!("Empty command");
-        }
-
-        // Extract env vars
-        let mut env_vars = HashMap::new();
-        let mut cmd_start = 0;
-
-        for (i, token) in tokens.iter().enumerate() {
-            if let Token::EnvVar(key, value) = token {
-                env_vars.insert(key.clone(), value.clone());
-                cmd_start = i + 1;
-            } else {
-                break;
-            }
-        }
-
-        // Check for pipes and redirects
-        let is_piped = tokens.iter().any(|t| matches!(t, Token::Pipe));
-        let has_redirect = tokens.iter().any(|t| {
-            matches!(
-                t,
-                Token::RedirectOut | Token::RedirectAppend | Token::RedirectIn
-            )
-        });
-
-        // Get the words for the first command (before any pipe/redirect/operator)
-        let words: Vec<String> = tokens[cmd_start..]
-            .iter()
-            .take_while(|t| {
-                !matches!(
-                    t,
-                    Token::Pipe
-                        | Token::RedirectOut
-                        | Token::RedirectAppend
-                        | Token::RedirectIn
-                        | Token::And
-                        | Token::Or
-                        | Token::Semicolon
-                        | Token::Background
-                )
-            })
-            .filter_map(|t| {
-                if let Token::Word(w) = t {
-                    Some(w.clone())
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        if words.is_empty() {
-            bail!("Empty command");
-        }
-
-        let program = words[0].clone();
-        let remaining: Vec<String> = words[1..].to_vec();
-
-        // Use semantic analyzer to extract subcommands, flags, and args
-        let analyzer = SemanticAnalyzer::new();
-        let (subcommands, flags, args) = analyzer.analyze(&program, &remaining);
-
-        Ok(ParsedCommand {
-            raw: command.to_string(),
-            program,
-            subcommands,
-            args,
-            flags,
-            is_piped,
-            has_redirect,
-            env_vars,
-        })
+        let commands = parse_with_brush(command)?;
+        commands
+            .into_iter()
+            .next()
+            .ok_or_else(|| anyhow::anyhow!("Empty command"))
     }
 }
 
@@ -115,7 +62,9 @@ mod tests {
 
     #[test]
     fn test_simple_command() {
-        let cmd = ParsedCommand::parse("ls -la").unwrap();
+        let cmds = ParsedCommand::parse_all("ls -la").unwrap();
+        assert_eq!(cmds.len(), 1);
+        let cmd = &cmds[0];
         assert_eq!(cmd.program, "ls");
         assert!(cmd.flags.contains("-l"));
         assert!(cmd.flags.contains("-a"));
@@ -124,14 +73,19 @@ mod tests {
 
     #[test]
     fn test_git_status() {
-        let cmd = ParsedCommand::parse("git status").unwrap();
+        let cmds = ParsedCommand::parse_all("git status").unwrap();
+        assert_eq!(cmds.len(), 1);
+        let cmd = &cmds[0];
         assert_eq!(cmd.program, "git");
         assert_eq!(cmd.subcommands, vec!["status"]);
     }
 
     #[test]
     fn test_git_remote_add() {
-        let cmd = ParsedCommand::parse("git remote add origin https://github.com/foo/bar").unwrap();
+        let cmds =
+            ParsedCommand::parse_all("git remote add origin https://github.com/foo/bar").unwrap();
+        assert_eq!(cmds.len(), 1);
+        let cmd = &cmds[0];
         assert_eq!(cmd.program, "git");
         assert_eq!(cmd.subcommands, vec!["remote", "add"]);
         assert!(cmd.args.contains(&"origin".to_string()));
@@ -139,7 +93,9 @@ mod tests {
 
     #[test]
     fn test_docker_compose_up() {
-        let cmd = ParsedCommand::parse("docker compose up -d").unwrap();
+        let cmds = ParsedCommand::parse_all("docker compose up -d").unwrap();
+        assert_eq!(cmds.len(), 1);
+        let cmd = &cmds[0];
         assert_eq!(cmd.program, "docker");
         assert_eq!(cmd.subcommands, vec!["compose", "up"]);
         assert!(cmd.flags.contains("-d"));
@@ -147,18 +103,42 @@ mod tests {
 
     #[test]
     fn test_piped_command() {
-        let cmd = ParsedCommand::parse("ls | grep foo").unwrap();
-        assert_eq!(cmd.program, "ls");
-        assert!(cmd.is_piped);
+        let cmds = ParsedCommand::parse_all("ls | grep foo").unwrap();
+        // With brush-parser, we now get ALL commands in the pipeline
+        assert_eq!(cmds.len(), 2);
+        assert_eq!(cmds[0].program, "ls");
+        assert_eq!(cmds[1].program, "grep");
+        assert!(cmds[0].is_piped);
+        assert!(cmds[1].is_piped);
     }
 
     #[test]
     fn test_env_vars() {
-        let cmd = ParsedCommand::parse("NODE_ENV=production npm start").unwrap();
+        let cmds = ParsedCommand::parse_all("NODE_ENV=production npm start").unwrap();
+        assert_eq!(cmds.len(), 1);
+        let cmd = &cmds[0];
         assert_eq!(cmd.program, "npm");
         assert_eq!(
             cmd.env_vars.get("NODE_ENV"),
             Some(&"production".to_string())
         );
+    }
+
+    #[test]
+    fn test_pipeline_all_commands() {
+        let cmds = ParsedCommand::parse_all("ls | grep foo | wc -l").unwrap();
+        assert_eq!(cmds.len(), 3);
+        assert_eq!(cmds[0].program, "ls");
+        assert_eq!(cmds[1].program, "grep");
+        assert_eq!(cmds[2].program, "wc");
+    }
+
+    #[test]
+    fn test_chain_all_commands() {
+        let cmds = ParsedCommand::parse_all("cd /tmp && ls -la || echo failed").unwrap();
+        assert_eq!(cmds.len(), 3);
+        assert_eq!(cmds[0].program, "cd");
+        assert_eq!(cmds[1].program, "ls");
+        assert_eq!(cmds[2].program, "echo");
     }
 }
