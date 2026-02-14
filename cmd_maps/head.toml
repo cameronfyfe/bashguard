@@ -1,0 +1,7 @@
+# Head command map for bashguard
+#
+# Capabilities:
+#   fs.read - Reading files from the filesystem
+
+cmd = "head"
+capabilities = ["fs.read"]

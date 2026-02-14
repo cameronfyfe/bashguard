@@ -47,6 +47,26 @@ impl SemanticAnalyzer {
             programs.insert("docker", Self::program_info_from_cmd_map(cmd_map));
         }
 
+        if let Some(cmd_map) = Self::load_cmd_map("grep") {
+            programs.insert("grep", Self::program_info_from_cmd_map(cmd_map));
+        }
+
+        if let Some(cmd_map) = Self::load_cmd_map("cat") {
+            programs.insert("cat", Self::program_info_from_cmd_map(cmd_map));
+        }
+
+        if let Some(cmd_map) = Self::load_cmd_map("less") {
+            programs.insert("less", Self::program_info_from_cmd_map(cmd_map));
+        }
+
+        if let Some(cmd_map) = Self::load_cmd_map("head") {
+            programs.insert("head", Self::program_info_from_cmd_map(cmd_map));
+        }
+
+        if let Some(cmd_map) = Self::load_cmd_map("tail") {
+            programs.insert("tail", Self::program_info_from_cmd_map(cmd_map));
+        }
+
         // kubectl
         programs.insert(
             "kubectl",
@@ -547,6 +567,11 @@ impl SemanticAnalyzer {
         let embedded = match program {
             "git" => Some(include_str!("../../cmd_maps/git.toml")),
             "docker" => Some(include_str!("../../cmd_maps/docker.toml")),
+            "grep" => Some(include_str!("../../cmd_maps/grep.toml")),
+            "cat" => Some(include_str!("../../cmd_maps/cat.toml")),
+            "less" => Some(include_str!("../../cmd_maps/less.toml")),
+            "head" => Some(include_str!("../../cmd_maps/head.toml")),
+            "tail" => Some(include_str!("../../cmd_maps/tail.toml")),
             _ => None,
         };
 

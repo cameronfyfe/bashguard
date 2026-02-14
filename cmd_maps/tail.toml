@@ -1,0 +1,7 @@
+# Tail command map for bashguard
+#
+# Capabilities:
+#   fs.read - Reading files from the filesystem
+
+cmd = "tail"
+capabilities = ["fs.read"]

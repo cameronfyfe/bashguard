@@ -466,6 +466,13 @@ mod tests {
     }
 
     #[test]
+    fn test_grep_fs_read_capability() {
+        let results = parse_with_brush("grep -r pattern /etc").unwrap();
+        assert_eq!(results.len(), 1);
+        assert!(results[0].capabilities.contains("fs.read"));
+    }
+
+    #[test]
     fn test_single_command_not_piped() {
         let results = parse_with_brush("ls -la").unwrap();
         assert_eq!(results.len(), 1);

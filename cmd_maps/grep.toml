@@ -1,0 +1,7 @@
+# Grep command map for bashguard
+#
+# Capabilities:
+#   fs.read - Reading files from the filesystem
+
+cmd = "grep"
+capabilities = ["fs.read"]
