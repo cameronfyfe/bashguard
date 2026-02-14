@@ -4,7 +4,10 @@ use std::{
     path::PathBuf,
 };
 
-use crate::cmd_map::{CmdCapability, CmdMap};
+use crate::{
+    cmd_map::{CmdCapability, CmdMap},
+    parser::command::CapabilitySource,
+};
 
 /// Known programs and their subcommand patterns
 #[derive(Debug)]
@@ -504,7 +507,7 @@ impl SemanticAnalyzer {
         program: &str,
         remaining: &[String],
     ) -> (Vec<String>, HashSet<String>, Vec<String>) {
-        let (subcommands, flags, args, _) = self.analyze_with_capabilities(program, remaining);
+        let (subcommands, flags, args, _, _) = self.analyze_with_capabilities(program, remaining);
         (subcommands, flags, args)
     }
 
@@ -518,11 +521,13 @@ impl SemanticAnalyzer {
         HashSet<String>,
         Vec<String>,
         HashSet<CmdCapability>,
+        HashMap<String, CapabilitySource>,
     ) {
         let mut subcommands = Vec::new();
         let mut flags = HashSet::new();
         let mut args = Vec::new();
         let mut capabilities: HashSet<CmdCapability> = HashSet::new();
+        let mut capability_sources: HashMap<String, CapabilitySource> = HashMap::new();
 
         let program_info = self.programs.get(program);
         let max_depth = program_info.map(|p| p.max_subcommand_depth).unwrap_or(0);
@@ -532,7 +537,10 @@ impl SemanticAnalyzer {
 
         if let Some(cmd_map) = current_cmd_map {
             active_cmd_maps.push(cmd_map);
-            capabilities.extend(cmd_map.capabilities.iter().cloned());
+            for cap in &cmd_map.capabilities {
+                capabilities.insert(cap.clone());
+                capability_sources.insert(cap.clone(), CapabilitySource::Program);
+            }
         }
 
         let mut in_subcommand_region = true;
@@ -549,7 +557,11 @@ impl SemanticAnalyzer {
                 {
                     subcommands.push(word.clone());
                     subcommand_depth += 1;
-                    capabilities.extend(next_map.capabilities.iter().cloned());
+                    for cap in &next_map.capabilities {
+                        capabilities.insert(cap.clone());
+                        capability_sources
+                            .insert(cap.clone(), CapabilitySource::Subcommand(word.clone()));
+                    }
                     active_cmd_maps.push(next_map);
                     current_cmd_map = Some(next_map);
                 } else if current_cmd_map.is_none()
@@ -574,17 +586,22 @@ impl SemanticAnalyzer {
         for flag in &flags {
             for cmd_map in &active_cmd_maps {
                 if let Some(additions) = cmd_map.flags_add_capabilities.get(flag) {
-                    capabilities.extend(additions.iter().cloned());
+                    for cap in additions {
+                        capabilities.insert(cap.clone());
+                        capability_sources
+                            .insert(cap.clone(), CapabilitySource::Flag(flag.clone()));
+                    }
                 }
                 if let Some(removals) = cmd_map.flags_remove_capabilities.get(flag) {
                     for capability in removals {
                         capabilities.remove(capability);
+                        capability_sources.remove(capability);
                     }
                 }
             }
         }
 
-        (subcommands, flags, args, capabilities)
+        (subcommands, flags, args, capabilities, capability_sources)
     }
 
     fn load_cmd_map(program: &str) -> Option<CmdMap> {
@@ -726,16 +743,21 @@ mod tests {
     #[test]
     fn test_git_push_force_capability() {
         let analyzer = SemanticAnalyzer::new();
-        let (_, _, _, capabilities) =
+        let (_, _, _, capabilities, capability_sources) =
             analyzer.analyze_with_capabilities("git", &["push".to_string(), "--force".to_string()]);
         assert!(capabilities.contains("git.push"));
         assert!(capabilities.contains("git.force_push"));
+        // Verify source tracking
+        assert!(matches!(
+            capability_sources.get("git.force_push"),
+            Some(CapabilitySource::Flag(f)) if f == "--force"
+        ));
     }
 
     #[test]
     fn test_git_remote_add_capability() {
         let analyzer = SemanticAnalyzer::new();
-        let (_, _, _, capabilities) = analyzer.analyze_with_capabilities(
+        let (_, _, _, capabilities, _) = analyzer.analyze_with_capabilities(
             "git",
             &[
                 "remote".to_string(),

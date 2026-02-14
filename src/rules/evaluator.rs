@@ -1,7 +1,7 @@
-use super::matcher::{MatchInfo, RuleMatcher};
+use super::matcher::{MatchInfo, MatchReason, RuleMatcher};
 use crate::{
     config::{Action, Config, Rule},
-    parser::ParsedCommand,
+    parser::{CapabilitySource, ParsedCommand},
 };
 
 /// The decision made about a command
@@ -101,11 +101,13 @@ impl<'a> Evaluator<'a> {
     fn evaluate_single_with_trace(&self, command: &ParsedCommand) -> (Decision, Option<Rule>) {
         let capability_policy = self.evaluate_capability_policies(command);
 
-        if let Some((Action::Deny, capability)) = capability_policy.as_ref() {
+        if let Some((Action::Deny, capability, source)) = capability_policy.as_ref() {
+            let match_info =
+                Self::match_info_from_capability_source(command, capability, source.as_ref());
             return (
                 Decision::Deny {
                     message: format!("Blocked by global capability policy: {}", capability),
-                    match_info: None,
+                    match_info,
                 },
                 None,
             );
@@ -116,15 +118,20 @@ impl<'a> Evaluator<'a> {
             if let Some(match_info) = RuleMatcher::matches_with_info(rule, command) {
                 let decision = Self::make_decision(rule, Some(match_info));
 
-                if let Some((Action::Prompt, capability)) = capability_policy.as_ref() {
+                if let Some((Action::Prompt, capability, source)) = capability_policy.as_ref() {
                     if matches!(decision, Decision::Allow) {
+                        let match_info = Self::match_info_from_capability_source(
+                            command,
+                            capability,
+                            source.as_ref(),
+                        );
                         return (
                             Decision::Prompt {
                                 message: format!(
                                     "Requires confirmation by global capability policy: {}",
                                     capability
                                 ),
-                                match_info: None,
+                                match_info,
                             },
                             Some(rule.clone()),
                         );
@@ -135,20 +142,22 @@ impl<'a> Evaluator<'a> {
             }
         }
 
-        if let Some((Action::Prompt, capability)) = capability_policy.as_ref() {
+        if let Some((Action::Prompt, capability, source)) = capability_policy.as_ref() {
+            let match_info =
+                Self::match_info_from_capability_source(command, capability, source.as_ref());
             return (
                 Decision::Prompt {
                     message: format!(
                         "Requires confirmation by global capability policy: {}",
                         capability
                     ),
-                    match_info: None,
+                    match_info,
                 },
                 None,
             );
         }
 
-        if let Some((Action::Allow, _)) = capability_policy.as_ref() {
+        if let Some((Action::Allow, _, _)) = capability_policy.as_ref() {
             return (Decision::Allow, None);
         }
 
@@ -168,7 +177,10 @@ impl<'a> Evaluator<'a> {
         (decision, None)
     }
 
-    fn evaluate_capability_policies(&self, command: &ParsedCommand) -> Option<(Action, String)> {
+    fn evaluate_capability_policies(
+        &self,
+        command: &ParsedCommand,
+    ) -> Option<(Action, String, Option<CapabilitySource>)> {
         let mut matches: Vec<(&String, &Action)> = command
             .capabilities
             .iter()
@@ -190,18 +202,55 @@ impl<'a> Evaluator<'a> {
             .iter()
             .find(|(_, action)| matches!(action, Action::Deny))
         {
-            return Some((Action::Deny, (*capability).clone()));
+            let source = command.capability_sources.get(*capability).cloned();
+            return Some((Action::Deny, (*capability).clone(), source));
         }
 
         if let Some((capability, _)) = matches
             .iter()
             .find(|(_, action)| matches!(action, Action::Prompt))
         {
-            return Some((Action::Prompt, (*capability).clone()));
+            let source = command.capability_sources.get(*capability).cloned();
+            return Some((Action::Prompt, (*capability).clone(), source));
         }
 
         let capability = matches[0].0.clone();
-        Some((Action::Allow, capability))
+        let source = command.capability_sources.get(&capability).cloned();
+        Some((Action::Allow, capability, source))
+    }
+
+    /// Create a MatchInfo from a capability source
+    fn match_info_from_capability_source(
+        command: &ParsedCommand,
+        capability: &str,
+        source: Option<&CapabilitySource>,
+    ) -> Option<MatchInfo> {
+        match source {
+            Some(CapabilitySource::Flag(flag)) => {
+                // Find the flag position in the raw command
+                command.raw.find(flag.as_str()).map(|pos| MatchInfo {
+                    reason: MatchReason::FlagPresent(flag.clone()),
+                    span_start: pos,
+                    span_end: pos + flag.len(),
+                })
+            }
+            Some(CapabilitySource::Subcommand(subcmd)) => {
+                // Find the subcommand position in the raw command
+                command.raw.find(subcmd.as_str()).map(|pos| MatchInfo {
+                    reason: MatchReason::Subcommands(vec![subcmd.clone()]),
+                    span_start: pos,
+                    span_end: pos + subcmd.len(),
+                })
+            }
+            Some(CapabilitySource::Program) | None => {
+                // Point to the program name
+                command.raw.find(&command.program).map(|pos| MatchInfo {
+                    reason: MatchReason::Program(capability.to_string()),
+                    span_start: pos,
+                    span_end: pos + command.program.len(),
+                })
+            }
+        }
     }
 
     fn make_decision(rule: &Rule, match_info: Option<MatchInfo>) -> Decision {

@@ -4,6 +4,17 @@ use anyhow::Result;
 
 use super::brush_adapter::parse_with_brush;
 
+/// Source of a capability (for error reporting)
+#[derive(Debug, Clone)]
+pub enum CapabilitySource {
+    /// Capability from base program
+    Program,
+    /// Capability from a subcommand
+    Subcommand(String),
+    /// Capability added by a flag
+    Flag(String),
+}
+
 /// A parsed shell command with semantic information
 #[derive(Debug, Clone)]
 pub struct ParsedCommand {
@@ -19,6 +30,8 @@ pub struct ParsedCommand {
     pub flags: HashSet<String>,
     /// Derived capability tags from command map metadata
     pub capabilities: HashSet<String>,
+    /// Maps capability to its source (for error reporting)
+    pub capability_sources: HashMap<String, CapabilitySource>,
     /// Whether the command contains a pipe
     pub is_piped: bool,
     /// Whether the command has output redirection

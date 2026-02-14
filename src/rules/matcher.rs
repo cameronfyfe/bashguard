@@ -34,6 +34,11 @@ pub enum MatchReason {
     Multiple(Box<MatchInfo>),
 }
 
+// ANSI color codes
+const RED: &str = "\x1b[31m";
+const BOLD_RED: &str = "\x1b[1;31m";
+const RESET: &str = "\x1b[0m";
+
 impl MatchInfo {
     /// Format the match info as a compiler-style error message
     pub fn format_error(&self, raw_command: &str, message: &str) -> String {
@@ -50,9 +55,16 @@ impl MatchInfo {
             output.push('\n');
         }
 
-        // Line 3: The full command (indented)
+        // Line 3: The full command (indented) with the problematic part highlighted
         output.push_str("\n  ");
-        output.push_str(raw_command);
+        let before = &raw_command[..self.span_start];
+        let highlighted = &raw_command[self.span_start..self.span_end];
+        let after = &raw_command[self.span_end..];
+        output.push_str(before);
+        output.push_str(BOLD_RED);
+        output.push_str(highlighted);
+        output.push_str(RESET);
+        output.push_str(after);
         output.push('\n');
 
         // Line 4: Underline pointing to the problematic part (with 2-space indent to match command)
@@ -60,7 +72,9 @@ impl MatchInfo {
         let underline_len = (self.span_end - self.span_start).max(1);
         let underline = "^".repeat(underline_len);
         output.push_str(&spaces);
+        output.push_str(RED);
         output.push_str(&underline);
+        output.push_str(RESET);
 
         output
     }

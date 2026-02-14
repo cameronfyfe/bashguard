@@ -269,7 +269,7 @@ fn extract_simple_command(
     let program = words[0].clone();
     let remaining: Vec<String> = words[1..].to_vec();
 
-    let (subcommands, flags, args, capabilities) =
+    let (subcommands, flags, args, capabilities, capability_sources) =
         ctx.analyzer.analyze_with_capabilities(&program, &remaining);
 
     Ok(Some(ParsedCommand {
@@ -279,6 +279,7 @@ fn extract_simple_command(
         args,
         flags,
         capabilities,
+        capability_sources,
         is_piped,
         has_redirect,
         env_vars,
