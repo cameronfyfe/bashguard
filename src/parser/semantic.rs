@@ -9,6 +9,16 @@ use crate::{
     parser::command::CapabilitySource,
 };
 
+/// Result of semantic analysis with capability information
+#[allow(dead_code)]
+type AnalysisResult = (
+    Vec<String>,                       // subcommands
+    HashSet<String>,                   // flags
+    Vec<String>,                       // args
+    HashSet<CmdCapability>,            // capabilities
+    HashMap<String, CapabilitySource>, // capability_sources
+);
+
 /// Known programs and their subcommand patterns
 #[derive(Debug)]
 struct ProgramInfo {
@@ -512,17 +522,7 @@ impl SemanticAnalyzer {
     }
 
     /// Analyze a command and extract subcommands, flags, args, and capability tags.
-    pub fn analyze_with_capabilities(
-        &self,
-        program: &str,
-        remaining: &[String],
-    ) -> (
-        Vec<String>,
-        HashSet<String>,
-        Vec<String>,
-        HashSet<CmdCapability>,
-        HashMap<String, CapabilitySource>,
-    ) {
+    pub fn analyze_with_capabilities(&self, program: &str, remaining: &[String]) -> AnalysisResult {
         let mut subcommands = Vec::new();
         let mut flags = HashSet::new();
         let mut args = Vec::new();
