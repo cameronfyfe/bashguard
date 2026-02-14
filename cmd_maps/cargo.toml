@@ -1,0 +1,161 @@
+# Cargo command map for bashguard
+#
+# Capabilities:
+#   cargo.read-local    - Reading project info (check, tree, metadata)
+#   cargo.build         - Building the project
+#   cargo.run           - Running code (run, test, bench)
+#   cargo.write-local   - Modifying project files (init, new, add, remove)
+#   cargo.install       - Installing binaries
+#   cargo.publish       - Publishing to crates.io
+#   cargo.auth          - Authentication with crates.io
+
+cmd = "cargo"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "check"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "tree"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "metadata"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "pkgid"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "read-manifest"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "locate-project"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "verify-project"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "version"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "search"
+capabilities = ["cargo.read-local"]
+
+[[subcmds]]
+cmd = "build"
+capabilities = ["cargo.build"]
+
+[[subcmds]]
+cmd = "clippy"
+capabilities = ["cargo.build"]
+
+[[subcmds]]
+cmd = "doc"
+capabilities = ["cargo.build"]
+
+[[subcmds]]
+cmd = "rustc"
+capabilities = ["cargo.build"]
+
+[[subcmds]]
+cmd = "rustdoc"
+capabilities = ["cargo.build"]
+
+[[subcmds]]
+cmd = "fix"
+capabilities = ["cargo.build", "cargo.write-local"]
+
+[[subcmds]]
+cmd = "run"
+capabilities = ["cargo.run"]
+
+[[subcmds]]
+cmd = "test"
+capabilities = ["cargo.run"]
+
+[[subcmds]]
+cmd = "bench"
+capabilities = ["cargo.run"]
+
+[[subcmds]]
+cmd = "init"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "new"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "add"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "remove"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "update"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "generate-lockfile"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "fetch"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "vendor"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "clean"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "fmt"
+capabilities = ["cargo.write-local"]
+
+[[subcmds]]
+cmd = "package"
+capabilities = ["cargo.build"]
+
+[[subcmds]]
+cmd = "install"
+capabilities = ["cargo.install"]
+
+[[subcmds]]
+cmd = "uninstall"
+capabilities = ["cargo.install"]
+
+[[subcmds]]
+cmd = "publish"
+capabilities = ["cargo.publish"]
+
+[[subcmds]]
+cmd = "yank"
+capabilities = ["cargo.publish"]
+
+[[subcmds]]
+cmd = "owner"
+capabilities = ["cargo.publish"]
+
+[[subcmds]]
+cmd = "login"
+capabilities = ["cargo.auth"]
+
+[[subcmds]]
+cmd = "logout"
+capabilities = ["cargo.auth"]
+
+[[subcmds]]
+cmd = "report"
+capabilities = ["cargo.read-local"]

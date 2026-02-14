@@ -1,0 +1,170 @@
+# Terraform command map for bashguard
+#
+# Capabilities:
+#   terraform.read-local   - Reading state and plans (plan, show, output)
+#   terraform.write-local  - Modifying infrastructure (apply, import)
+#   terraform.init         - Initializing providers and modules
+#   terraform.destroy      - Destroying infrastructure
+#   terraform.state        - Direct state manipulation
+#   terraform.auth         - Authentication operations
+#   terraform.workspace    - Workspace management
+#   terraform.providers    - Provider management
+
+cmd = "terraform"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "plan"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "show"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "output"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "validate"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "fmt"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "version"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "graph"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "console"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "test"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "metadata"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "apply"
+capabilities = ["terraform.write-local"]
+
+[[subcmds]]
+cmd = "import"
+capabilities = ["terraform.write-local"]
+
+[[subcmds]]
+cmd = "refresh"
+capabilities = ["terraform.write-local"]
+
+[[subcmds]]
+cmd = "taint"
+capabilities = ["terraform.write-local"]
+
+[[subcmds]]
+cmd = "untaint"
+capabilities = ["terraform.write-local"]
+
+[[subcmds]]
+cmd = "init"
+capabilities = ["terraform.init"]
+
+[[subcmds]]
+cmd = "get"
+capabilities = ["terraform.init"]
+
+[[subcmds]]
+cmd = "destroy"
+capabilities = ["terraform.destroy"]
+
+[[subcmds]]
+cmd = "state"
+capabilities = ["terraform.state"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["terraform.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["terraform.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "pull"
+capabilities = ["terraform.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "push"
+capabilities = ["terraform.state"]
+
+[[subcmds.subcmds]]
+cmd = "mv"
+capabilities = ["terraform.state"]
+
+[[subcmds.subcmds]]
+cmd = "rm"
+capabilities = ["terraform.state"]
+
+[[subcmds.subcmds]]
+cmd = "replace-provider"
+capabilities = ["terraform.state"]
+
+[[subcmds]]
+cmd = "workspace"
+capabilities = ["terraform.workspace"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["terraform.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["terraform.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "select"
+capabilities = ["terraform.workspace"]
+
+[[subcmds.subcmds]]
+cmd = "new"
+capabilities = ["terraform.workspace"]
+
+[[subcmds.subcmds]]
+cmd = "delete"
+capabilities = ["terraform.workspace"]
+
+[[subcmds]]
+cmd = "providers"
+capabilities = ["terraform.providers"]
+
+[[subcmds.subcmds]]
+cmd = "lock"
+capabilities = ["terraform.providers"]
+
+[[subcmds.subcmds]]
+cmd = "mirror"
+capabilities = ["terraform.providers"]
+
+[[subcmds.subcmds]]
+cmd = "schema"
+capabilities = ["terraform.read-local"]
+
+[[subcmds]]
+cmd = "login"
+capabilities = ["terraform.auth"]
+
+[[subcmds]]
+cmd = "logout"
+capabilities = ["terraform.auth"]
+
+[[subcmds]]
+cmd = "force-unlock"
+capabilities = ["terraform.state"]

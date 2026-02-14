@@ -1,0 +1,275 @@
+# Kubectl command map for bashguard
+#
+# Capabilities:
+#   kubectl.read-local    - Reading cluster state (get, describe, logs)
+#   kubectl.write-local   - Modifying cluster state (apply, create, patch, label)
+#   kubectl.delete        - Deleting resources
+#   kubectl.exec          - Executing commands in containers
+#   kubectl.port-forward  - Port forwarding to pods/services
+#   kubectl.auth          - Authentication and authorization
+#   kubectl.config        - Cluster configuration changes
+#   kubectl.drain         - Draining nodes (disruptive)
+#   kubectl.debug         - Debug operations
+
+cmd = "kubectl"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "get"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "describe"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "logs"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "top"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "explain"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "api-resources"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "api-versions"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "version"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "cluster-info"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "diff"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "wait"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "apply"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "create"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "patch"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "replace"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "label"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "annotate"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "set"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "edit"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "scale"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "autoscale"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "expose"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "run"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "taint"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "untaint"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "cordon"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "uncordon"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "delete"
+capabilities = ["kubectl.delete"]
+
+[[subcmds]]
+cmd = "drain"
+capabilities = ["kubectl.drain"]
+
+[[subcmds]]
+cmd = "exec"
+capabilities = ["kubectl.exec"]
+
+[[subcmds]]
+cmd = "attach"
+capabilities = ["kubectl.exec"]
+
+[[subcmds]]
+cmd = "cp"
+capabilities = ["kubectl.exec"]
+
+[[subcmds]]
+cmd = "debug"
+capabilities = ["kubectl.debug"]
+
+[[subcmds]]
+cmd = "port-forward"
+capabilities = ["kubectl.port-forward"]
+
+[[subcmds]]
+cmd = "proxy"
+capabilities = ["kubectl.port-forward"]
+
+[[subcmds]]
+cmd = "auth"
+capabilities = ["kubectl.auth"]
+
+[[subcmds.subcmds]]
+cmd = "can-i"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "whoami"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "config"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "view"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "current-context"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "get-contexts"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "get-clusters"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "get-users"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "use-context"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "set-context"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "set-cluster"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "set-credentials"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "delete-context"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "delete-cluster"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "delete-user"
+capabilities = ["kubectl.config"]
+
+[[subcmds.subcmds]]
+cmd = "rename-context"
+capabilities = ["kubectl.config"]
+
+[[subcmds]]
+cmd = "rollout"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "status"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "history"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "restart"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "undo"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "pause"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "resume"
+capabilities = ["kubectl.write-local"]
+
+[[subcmds]]
+cmd = "kustomize"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "completion"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "options"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "plugin"
+capabilities = ["kubectl.read-local"]
+
+[[subcmds]]
+cmd = "certificate"
+capabilities = ["kubectl.auth"]
+
+[[subcmds]]
+cmd = "alpha"
+capabilities = ["kubectl.read-local"]

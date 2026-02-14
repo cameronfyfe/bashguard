@@ -1,0 +1,477 @@
+# Azure CLI command map for bashguard
+#
+# Capabilities:
+#   az.read        - Reading Azure resources (list, show, get)
+#   az.write       - Creating/modifying resources (create, update, set)
+#   az.delete      - Deleting resources
+#   az.auth        - Authentication and authorization
+#   az.config      - CLI configuration
+#   az.compute     - Virtual machine operations
+#   az.network     - Networking operations
+#   az.storage     - Storage operations
+#   az.aks         - Kubernetes service operations
+#   az.acr         - Container registry operations
+#   az.keyvault    - Key vault operations
+#   az.sql         - SQL database operations
+#   az.cosmosdb    - Cosmos DB operations
+#   az.monitor     - Monitoring operations
+#   az.iam         - Identity and access management
+
+cmd = "az"
+capabilities = ["az.read"]
+
+[[subcmds]]
+cmd = "login"
+capabilities = ["az.auth"]
+
+[[subcmds]]
+cmd = "logout"
+capabilities = ["az.auth"]
+
+[[subcmds]]
+cmd = "account"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "set"
+capabilities = ["az.config"]
+
+[[subcmds.subcmds]]
+cmd = "get-access-token"
+capabilities = ["az.auth"]
+
+[[subcmds]]
+cmd = "configure"
+capabilities = ["az.config"]
+
+[[subcmds]]
+cmd = "config"
+capabilities = ["az.config"]
+
+[[subcmds]]
+cmd = "version"
+capabilities = ["az.read"]
+
+[[subcmds]]
+cmd = "extension"
+capabilities = ["az.config"]
+
+[[subcmds]]
+cmd = "group"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["az.write"]
+
+[[subcmds.subcmds]]
+cmd = "update"
+capabilities = ["az.write"]
+
+[[subcmds.subcmds]]
+cmd = "delete"
+capabilities = ["az.delete"]
+
+[[subcmds]]
+cmd = "resource"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["az.write"]
+
+[[subcmds.subcmds]]
+cmd = "update"
+capabilities = ["az.write"]
+
+[[subcmds.subcmds]]
+cmd = "delete"
+capabilities = ["az.delete"]
+
+[[subcmds]]
+cmd = "vm"
+capabilities = ["az.compute"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["az.write", "az.compute"]
+
+[[subcmds.subcmds]]
+cmd = "update"
+capabilities = ["az.write", "az.compute"]
+
+[[subcmds.subcmds]]
+cmd = "delete"
+capabilities = ["az.delete", "az.compute"]
+
+[[subcmds.subcmds]]
+cmd = "start"
+capabilities = ["az.compute"]
+
+[[subcmds.subcmds]]
+cmd = "stop"
+capabilities = ["az.compute"]
+
+[[subcmds.subcmds]]
+cmd = "restart"
+capabilities = ["az.compute"]
+
+[[subcmds.subcmds]]
+cmd = "deallocate"
+capabilities = ["az.compute"]
+
+[[subcmds]]
+cmd = "vmss"
+capabilities = ["az.compute"]
+
+[[subcmds]]
+cmd = "network"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "vnet"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "nsg"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "nic"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "public-ip"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "lb"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "dns"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "application-gateway"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "firewall"
+capabilities = ["az.network"]
+
+[[subcmds.subcmds]]
+cmd = "bastion"
+capabilities = ["az.network"]
+
+[[subcmds]]
+cmd = "storage"
+capabilities = ["az.storage"]
+
+[[subcmds.subcmds]]
+cmd = "account"
+capabilities = ["az.storage"]
+
+[[subcmds.subcmds]]
+cmd = "blob"
+capabilities = ["az.storage"]
+
+[[subcmds.subcmds]]
+cmd = "container"
+capabilities = ["az.storage"]
+
+[[subcmds.subcmds]]
+cmd = "queue"
+capabilities = ["az.storage"]
+
+[[subcmds.subcmds]]
+cmd = "table"
+capabilities = ["az.storage"]
+
+[[subcmds.subcmds]]
+cmd = "file"
+capabilities = ["az.storage"]
+
+[[subcmds.subcmds]]
+cmd = "share"
+capabilities = ["az.storage"]
+
+[[subcmds]]
+cmd = "aks"
+capabilities = ["az.aks"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["az.write", "az.aks"]
+
+[[subcmds.subcmds]]
+cmd = "update"
+capabilities = ["az.write", "az.aks"]
+
+[[subcmds.subcmds]]
+cmd = "delete"
+capabilities = ["az.delete", "az.aks"]
+
+[[subcmds.subcmds]]
+cmd = "get-credentials"
+capabilities = ["az.aks", "az.auth"]
+
+[[subcmds.subcmds]]
+cmd = "scale"
+capabilities = ["az.aks"]
+
+[[subcmds.subcmds]]
+cmd = "upgrade"
+capabilities = ["az.aks"]
+
+[[subcmds.subcmds]]
+cmd = "nodepool"
+capabilities = ["az.aks"]
+
+[[subcmds]]
+cmd = "acr"
+capabilities = ["az.acr"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["az.write", "az.acr"]
+
+[[subcmds.subcmds]]
+cmd = "delete"
+capabilities = ["az.delete", "az.acr"]
+
+[[subcmds.subcmds]]
+cmd = "login"
+capabilities = ["az.acr", "az.auth"]
+
+[[subcmds.subcmds]]
+cmd = "build"
+capabilities = ["az.acr"]
+
+[[subcmds.subcmds]]
+cmd = "repository"
+capabilities = ["az.acr"]
+
+[[subcmds]]
+cmd = "keyvault"
+capabilities = ["az.keyvault"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["az.read"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["az.write", "az.keyvault"]
+
+[[subcmds.subcmds]]
+cmd = "delete"
+capabilities = ["az.delete", "az.keyvault"]
+
+[[subcmds.subcmds]]
+cmd = "secret"
+capabilities = ["az.keyvault"]
+
+[[subcmds.subcmds]]
+cmd = "key"
+capabilities = ["az.keyvault"]
+
+[[subcmds.subcmds]]
+cmd = "certificate"
+capabilities = ["az.keyvault"]
+
+[[subcmds]]
+cmd = "sql"
+capabilities = ["az.sql"]
+
+[[subcmds.subcmds]]
+cmd = "server"
+capabilities = ["az.sql"]
+
+[[subcmds.subcmds]]
+cmd = "db"
+capabilities = ["az.sql"]
+
+[[subcmds]]
+cmd = "cosmosdb"
+capabilities = ["az.cosmosdb"]
+
+[[subcmds]]
+cmd = "mysql"
+capabilities = ["az.sql"]
+
+[[subcmds]]
+cmd = "postgres"
+capabilities = ["az.sql"]
+
+[[subcmds]]
+cmd = "mariadb"
+capabilities = ["az.sql"]
+
+[[subcmds]]
+cmd = "monitor"
+capabilities = ["az.monitor"]
+
+[[subcmds.subcmds]]
+cmd = "metrics"
+capabilities = ["az.read", "az.monitor"]
+
+[[subcmds.subcmds]]
+cmd = "log-analytics"
+capabilities = ["az.monitor"]
+
+[[subcmds.subcmds]]
+cmd = "diagnostic-settings"
+capabilities = ["az.monitor"]
+
+[[subcmds.subcmds]]
+cmd = "activity-log"
+capabilities = ["az.read", "az.monitor"]
+
+[[subcmds.subcmds]]
+cmd = "alert"
+capabilities = ["az.monitor"]
+
+[[subcmds.subcmds]]
+cmd = "action-group"
+capabilities = ["az.monitor"]
+
+[[subcmds.subcmds]]
+cmd = "autoscale"
+capabilities = ["az.monitor"]
+
+[[subcmds]]
+cmd = "ad"
+capabilities = ["az.iam"]
+
+[[subcmds.subcmds]]
+cmd = "user"
+capabilities = ["az.iam"]
+
+[[subcmds.subcmds]]
+cmd = "group"
+capabilities = ["az.iam"]
+
+[[subcmds.subcmds]]
+cmd = "sp"
+capabilities = ["az.iam"]
+
+[[subcmds.subcmds]]
+cmd = "app"
+capabilities = ["az.iam"]
+
+[[subcmds]]
+cmd = "role"
+capabilities = ["az.iam"]
+
+[[subcmds.subcmds]]
+cmd = "assignment"
+capabilities = ["az.iam"]
+
+[[subcmds.subcmds]]
+cmd = "definition"
+capabilities = ["az.iam"]
+
+[[subcmds]]
+cmd = "identity"
+capabilities = ["az.iam"]
+
+[[subcmds]]
+cmd = "policy"
+capabilities = ["az.iam"]
+
+[[subcmds]]
+cmd = "webapp"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "functionapp"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "appservice"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "staticwebapp"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "container"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "deployment"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "bicep"
+capabilities = ["az.read"]
+
+[[subcmds]]
+cmd = "tag"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "lock"
+capabilities = ["az.write"]
+
+[[subcmds]]
+cmd = "feature"
+capabilities = ["az.read"]
+
+[[subcmds]]
+cmd = "provider"
+capabilities = ["az.read"]
