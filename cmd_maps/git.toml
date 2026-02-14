@@ -1,3 +1,12 @@
+# Git command map for bashguard
+#
+# Capabilities:
+#   git.read-local   - Reading repository info (status, log, diff, blame)
+#   git.write-local  - Modifying local repository (add, commit, checkout, merge, rebase)
+#   git.pull         - Fetching from remote (fetch, pull, clone)
+#   git.push         - Pushing to remote (push)
+#   git.force_push   - Added by --force/-f/--force-with-lease flags (dangerous)
+
 cmd = "git"
 
 [[subcmds]]

@@ -43,96 +43,9 @@ impl SemanticAnalyzer {
             programs.insert("git", Self::program_info_from_cmd_map(cmd_map));
         }
 
-        // Docker and docker compose
-        programs.insert(
-            "docker",
-            ProgramInfo {
-                max_subcommand_depth: 2,
-                known_subcommands: [
-                    "build",
-                    "compose",
-                    "container",
-                    "context",
-                    "image",
-                    "network",
-                    "node",
-                    "plugin",
-                    "run",
-                    "secret",
-                    "service",
-                    "stack",
-                    "swarm",
-                    "system",
-                    "trust",
-                    "volume",
-                    "attach",
-                    "commit",
-                    "cp",
-                    "create",
-                    "diff",
-                    "events",
-                    "exec",
-                    "export",
-                    "history",
-                    "images",
-                    "import",
-                    "info",
-                    "inspect",
-                    "kill",
-                    "load",
-                    "login",
-                    "logout",
-                    "logs",
-                    "pause",
-                    "port",
-                    "ps",
-                    "pull",
-                    "push",
-                    "rename",
-                    "restart",
-                    "rm",
-                    "rmi",
-                    "save",
-                    "search",
-                    "start",
-                    "stats",
-                    "stop",
-                    "tag",
-                    "top",
-                    "unpause",
-                    "update",
-                    "version",
-                    "wait",
-                    // Compose subcommands
-                    "up",
-                    "down",
-                    "build",
-                    "config",
-                    "create",
-                    "events",
-                    "exec",
-                    "kill",
-                    "logs",
-                    "pause",
-                    "port",
-                    "ps",
-                    "pull",
-                    "push",
-                    "restart",
-                    "rm",
-                    "run",
-                    "scale",
-                    "start",
-                    "stop",
-                    "top",
-                    "unpause",
-                ]
-                .iter()
-                .map(|s| s.to_string())
-                .collect(),
-                cmd_map: None,
-            },
-        );
+        if let Some(cmd_map) = Self::load_cmd_map("docker") {
+            programs.insert("docker", Self::program_info_from_cmd_map(cmd_map));
+        }
 
         // kubectl
         programs.insert(
@@ -630,9 +543,15 @@ impl SemanticAnalyzer {
             }
         }
 
-        if program == "git" {
-            let embedded = include_str!("../../cmd_maps/git.toml");
-            if let Ok(cmd_map) = toml::from_str::<CmdMap>(embedded) {
+        // Embedded fallbacks for when cmd_maps directory isn't available
+        let embedded = match program {
+            "git" => Some(include_str!("../../cmd_maps/git.toml")),
+            "docker" => Some(include_str!("../../cmd_maps/docker.toml")),
+            _ => None,
+        };
+
+        if let Some(contents) = embedded {
+            if let Ok(cmd_map) = toml::from_str::<CmdMap>(contents) {
                 if cmd_map.cmd == program {
                     return Some(cmd_map);
                 }

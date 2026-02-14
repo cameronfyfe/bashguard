@@ -450,6 +450,22 @@ mod tests {
     }
 
     #[test]
+    fn test_docker_run_privileged_capability() {
+        let results = parse_with_brush("docker run --privileged ubuntu bash").unwrap();
+        assert_eq!(results.len(), 1);
+        assert!(results[0].capabilities.contains("docker.run"));
+        assert!(results[0].capabilities.contains("docker.privileged"));
+    }
+
+    #[test]
+    fn test_docker_compose_up_capability() {
+        let results = parse_with_brush("docker compose up -d").unwrap();
+        assert_eq!(results.len(), 1);
+        assert!(results[0].capabilities.contains("docker.compose"));
+        assert!(results[0].capabilities.contains("docker.run"));
+    }
+
+    #[test]
     fn test_single_command_not_piped() {
         let results = parse_with_brush("ls -la").unwrap();
         assert_eq!(results.len(), 1);

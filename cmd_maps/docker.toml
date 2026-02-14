@@ -1,0 +1,568 @@
+# Docker command map for bashguard
+#
+# Capabilities:
+#   docker.read-local   - Reading container/image info (ps, images, inspect, logs, stats)
+#   docker.write-local  - Modifying local state (rm, rmi, tag, commit, create)
+#   docker.run          - Running containers (run, compose up)
+#   docker.exec         - Executing commands in containers
+#   docker.build        - Building images
+#   docker.pull         - Pulling images from registry
+#   docker.push         - Pushing images to registry
+#   docker.lifecycle    - Container lifecycle (start, stop, restart, kill, pause)
+#   docker.network      - Network operations
+#   docker.volume       - Volume operations
+#   docker.compose      - Docker compose operations
+#   docker.auth         - Login/logout operations
+#   docker.privileged   - Added by --privileged flag (dangerous)
+#   docker.mount        - Added by -v/--volume/--mount flags (host filesystem access)
+
+cmd = "docker"
+
+# Top-level management commands
+[[subcmds]]
+cmd = "build"
+capabilities = ["docker.build"]
+flags_add_capabilities = { "--push" = ["docker.push"] }
+
+[[subcmds]]
+cmd = "compose"
+capabilities = ["docker.compose"]
+
+[[subcmds.subcmds]]
+cmd = "build"
+capabilities = ["docker.build"]
+
+[[subcmds.subcmds]]
+cmd = "config"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "cp"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "down"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "events"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "exec"
+capabilities = ["docker.exec"]
+
+[[subcmds.subcmds]]
+cmd = "images"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "kill"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "logs"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "ls"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "pause"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "port"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "ps"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "pull"
+capabilities = ["docker.pull"]
+
+[[subcmds.subcmds]]
+cmd = "push"
+capabilities = ["docker.push"]
+
+[[subcmds.subcmds]]
+cmd = "restart"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "rm"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "run"
+capabilities = ["docker.run"]
+flags_add_capabilities = { "--privileged" = ["docker.privileged"], "-v" = ["docker.mount"], "--volume" = ["docker.mount"], "--mount" = ["docker.mount"] }
+
+[[subcmds.subcmds]]
+cmd = "scale"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "start"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "stop"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "top"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "unpause"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "up"
+capabilities = ["docker.run"]
+flags_add_capabilities = { "--build" = ["docker.build"] }
+
+[[subcmds.subcmds]]
+cmd = "watch"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "container"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "attach"
+capabilities = ["docker.exec"]
+
+[[subcmds.subcmds]]
+cmd = "commit"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "cp"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "diff"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "exec"
+capabilities = ["docker.exec"]
+flags_add_capabilities = { "--privileged" = ["docker.privileged"] }
+
+[[subcmds.subcmds]]
+cmd = "export"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "inspect"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "kill"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "logs"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "ls"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "pause"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "port"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "prune"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "rename"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "restart"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "rm"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "run"
+capabilities = ["docker.run"]
+flags_add_capabilities = { "--privileged" = ["docker.privileged"], "-v" = ["docker.mount"], "--volume" = ["docker.mount"], "--mount" = ["docker.mount"] }
+
+[[subcmds.subcmds]]
+cmd = "start"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "stats"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "stop"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "top"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "unpause"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds.subcmds]]
+cmd = "update"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "wait"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "context"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "export"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "import"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "inspect"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "ls"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "rm"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "show"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "update"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "use"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "image"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "build"
+capabilities = ["docker.build"]
+
+[[subcmds.subcmds]]
+cmd = "history"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "import"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "inspect"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "load"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "ls"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "prune"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "pull"
+capabilities = ["docker.pull"]
+
+[[subcmds.subcmds]]
+cmd = "push"
+capabilities = ["docker.push"]
+
+[[subcmds.subcmds]]
+cmd = "rm"
+capabilities = ["docker.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "save"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "tag"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "network"
+capabilities = ["docker.network"]
+
+[[subcmds.subcmds]]
+cmd = "connect"
+capabilities = ["docker.network"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["docker.network"]
+
+[[subcmds.subcmds]]
+cmd = "disconnect"
+capabilities = ["docker.network"]
+
+[[subcmds.subcmds]]
+cmd = "inspect"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "ls"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "prune"
+capabilities = ["docker.network"]
+
+[[subcmds.subcmds]]
+cmd = "rm"
+capabilities = ["docker.network"]
+
+[[subcmds]]
+cmd = "volume"
+capabilities = ["docker.volume"]
+
+[[subcmds.subcmds]]
+cmd = "create"
+capabilities = ["docker.volume"]
+
+[[subcmds.subcmds]]
+cmd = "inspect"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "ls"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "prune"
+capabilities = ["docker.volume"]
+
+[[subcmds.subcmds]]
+cmd = "rm"
+capabilities = ["docker.volume"]
+
+[[subcmds]]
+cmd = "system"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "df"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "events"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "info"
+capabilities = ["docker.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "prune"
+capabilities = ["docker.write-local"]
+
+# Direct commands (shortcuts)
+[[subcmds]]
+cmd = "attach"
+capabilities = ["docker.exec"]
+
+[[subcmds]]
+cmd = "commit"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "cp"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "create"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "diff"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "events"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "exec"
+capabilities = ["docker.exec"]
+flags_add_capabilities = { "--privileged" = ["docker.privileged"] }
+
+[[subcmds]]
+cmd = "export"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "history"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "images"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "import"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "info"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "inspect"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "kill"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds]]
+cmd = "load"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "login"
+capabilities = ["docker.auth"]
+
+[[subcmds]]
+cmd = "logout"
+capabilities = ["docker.auth"]
+
+[[subcmds]]
+cmd = "logs"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "pause"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds]]
+cmd = "port"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "ps"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "pull"
+capabilities = ["docker.pull"]
+
+[[subcmds]]
+cmd = "push"
+capabilities = ["docker.push"]
+
+[[subcmds]]
+cmd = "rename"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "restart"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds]]
+cmd = "rm"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "rmi"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "run"
+capabilities = ["docker.run"]
+flags_add_capabilities = { "--privileged" = ["docker.privileged"], "-v" = ["docker.mount"], "--volume" = ["docker.mount"], "--mount" = ["docker.mount"] }
+
+[[subcmds]]
+cmd = "save"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "search"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "start"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds]]
+cmd = "stats"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "stop"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds]]
+cmd = "tag"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "top"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "unpause"
+capabilities = ["docker.lifecycle"]
+
+[[subcmds]]
+cmd = "update"
+capabilities = ["docker.write-local"]
+
+[[subcmds]]
+cmd = "version"
+capabilities = ["docker.read-local"]
+
+[[subcmds]]
+cmd = "wait"
+capabilities = ["docker.read-local"]
