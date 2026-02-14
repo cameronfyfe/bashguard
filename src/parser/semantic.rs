@@ -183,13 +183,13 @@ impl SemanticAnalyzer {
         let filename = format!("{program}.toml");
         let mut paths = Vec::new();
 
-        if let Ok(custom_dir) = std::env::var("BASHGUARD_CMD_MAP_DIR") {
+        if let Ok(custom_dir) = std::env::var("BASHGUARD_CMDS_DIR") {
             paths.push(PathBuf::from(custom_dir).join(&filename));
         }
-        paths.push(PathBuf::from("cmd_maps").join(&filename));
+        paths.push(PathBuf::from("cmds").join(&filename));
         paths.push(
             PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                .join("cmd_maps")
+                .join("cmds")
                 .join(&filename),
         );
 
@@ -205,19 +205,19 @@ impl SemanticAnalyzer {
             }
         }
 
-        // Embedded fallbacks for when cmd_maps directory isn't available
+        // Embedded fallbacks for when cmds directory isn't available
         let embedded = match program {
-            "git" => Some(include_str!("../../cmd_maps/git.toml")),
-            "docker" => Some(include_str!("../../cmd_maps/docker.toml")),
-            "grep" => Some(include_str!("../../cmd_maps/grep.toml")),
-            "cat" => Some(include_str!("../../cmd_maps/cat.toml")),
-            "less" => Some(include_str!("../../cmd_maps/less.toml")),
-            "head" => Some(include_str!("../../cmd_maps/head.toml")),
-            "tail" => Some(include_str!("../../cmd_maps/tail.toml")),
-            "kubectl" => Some(include_str!("../../cmd_maps/kubectl.toml")),
-            "terraform" => Some(include_str!("../../cmd_maps/terraform.toml")),
-            "cargo" => Some(include_str!("../../cmd_maps/cargo.toml")),
-            "az" => Some(include_str!("../../cmd_maps/az.toml")),
+            "git" => Some(include_str!("../../cmds/git.toml")),
+            "docker" => Some(include_str!("../../cmds/docker.toml")),
+            "grep" => Some(include_str!("../../cmds/grep.toml")),
+            "cat" => Some(include_str!("../../cmds/cat.toml")),
+            "less" => Some(include_str!("../../cmds/less.toml")),
+            "head" => Some(include_str!("../../cmds/head.toml")),
+            "tail" => Some(include_str!("../../cmds/tail.toml")),
+            "kubectl" => Some(include_str!("../../cmds/kubectl.toml")),
+            "terraform" => Some(include_str!("../../cmds/terraform.toml")),
+            "cargo" => Some(include_str!("../../cmds/cargo.toml")),
+            "az" => Some(include_str!("../../cmds/az.toml")),
             _ => None,
         };
 

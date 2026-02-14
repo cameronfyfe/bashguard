@@ -36,17 +36,17 @@ impl CmdMap {
 
 /// All known cmd_map sources (embedded)
 const EMBEDDED_CMD_MAPS: &[(&str, &str)] = &[
-    ("git", include_str!("../cmd_maps/git.toml")),
-    ("docker", include_str!("../cmd_maps/docker.toml")),
-    ("grep", include_str!("../cmd_maps/grep.toml")),
-    ("cat", include_str!("../cmd_maps/cat.toml")),
-    ("less", include_str!("../cmd_maps/less.toml")),
-    ("head", include_str!("../cmd_maps/head.toml")),
-    ("tail", include_str!("../cmd_maps/tail.toml")),
-    ("kubectl", include_str!("../cmd_maps/kubectl.toml")),
-    ("terraform", include_str!("../cmd_maps/terraform.toml")),
-    ("cargo", include_str!("../cmd_maps/cargo.toml")),
-    ("az", include_str!("../cmd_maps/az.toml")),
+    ("git", include_str!("../cmds/git.toml")),
+    ("docker", include_str!("../cmds/docker.toml")),
+    ("grep", include_str!("../cmds/grep.toml")),
+    ("cat", include_str!("../cmds/cat.toml")),
+    ("less", include_str!("../cmds/less.toml")),
+    ("head", include_str!("../cmds/head.toml")),
+    ("tail", include_str!("../cmds/tail.toml")),
+    ("kubectl", include_str!("../cmds/kubectl.toml")),
+    ("terraform", include_str!("../cmds/terraform.toml")),
+    ("cargo", include_str!("../cmds/cargo.toml")),
+    ("az", include_str!("../cmds/az.toml")),
 ];
 
 /// Get all capabilities grouped by command
