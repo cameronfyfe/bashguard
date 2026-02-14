@@ -18,7 +18,7 @@ impl ConfigLoader {
     /// - Profiles: ~/.config/bashguard/profiles/builtins/
     pub fn new() -> Result<Self> {
         let cwd = std::env::current_dir().context("Failed to get current directory")?;
-        let config_dir = cwd.join(".bashguard");
+        let config_dir = Self::find_config_dir(&cwd);
 
         let home = std::env::var("HOME").context("HOME environment variable not set")?;
         let profiles_dir = PathBuf::from(home)
@@ -31,6 +31,17 @@ impl ConfigLoader {
             config_dir,
             profiles_dir,
         })
+    }
+
+    fn find_config_dir(start: &Path) -> PathBuf {
+        for ancestor in start.ancestors() {
+            let candidate = ancestor.join(".bashguard").join("config.toml");
+            if candidate.exists() {
+                return ancestor.join(".bashguard");
+            }
+        }
+
+        start.join(".bashguard")
     }
 
     /// Create a config loader with custom paths (for testing)
@@ -207,5 +218,20 @@ mod tests {
         let config = loader.load().unwrap();
         assert_eq!(config.available_profiles.len(), 1);
         assert_eq!(config.available_profiles[0].name, "git/read-only");
+    }
+
+    #[test]
+    fn test_find_config_dir_in_parent() {
+        let temp = TempDir::new().unwrap();
+        let root = temp.path();
+        let config_dir = root.join(".bashguard");
+        let nested = root.join("nested").join("dir");
+
+        fs::create_dir_all(&config_dir).unwrap();
+        fs::write(config_dir.join("config.toml"), "").unwrap();
+        fs::create_dir_all(&nested).unwrap();
+
+        let found = ConfigLoader::find_config_dir(&nested);
+        assert_eq!(found, config_dir);
     }
 }
