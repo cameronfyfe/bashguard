@@ -73,22 +73,42 @@ fn check(args: cli::check::Args) -> Result<()> {
 
     if json {
         let output = match format {
-            cli::Tool::Claude => format_claude_code_output(&decision),
-            cli::Tool::OpenCode => format_opencode_output(&decision),
+            cli::Tool::Claude => format_claude_code_output(&decision, command_str),
+            cli::Tool::OpenCode => format_opencode_output(&decision, command_str),
         };
         println!("{}", serde_json::to_string(&output)?);
     } else {
         match &decision {
             Decision::Allow => println!("ALLOW"),
-            Decision::Deny { message } => println!("DENY: {}", message),
-            Decision::Prompt { message } => println!("PROMPT: {}", message),
+            Decision::Deny {
+                message,
+                match_info,
+            } => {
+                println!("DENY:");
+                if let Some(info) = match_info {
+                    println!("{}", info.format_error(command_str, message));
+                } else {
+                    println!("{}", message);
+                }
+            }
+            Decision::Prompt {
+                message,
+                match_info,
+            } => {
+                println!("PROMPT:");
+                if let Some(info) = match_info {
+                    println!("{}", info.format_error(command_str, message));
+                } else {
+                    println!("{}", message);
+                }
+            }
         }
     }
 
     Ok(())
 }
 
-fn format_claude_code_output(decision: &Decision) -> Value {
+fn format_claude_code_output(decision: &Decision, command: &str) -> Value {
     match decision {
         Decision::Allow => serde_json::json!({
             "hookSpecificOutput": {
@@ -97,30 +117,66 @@ fn format_claude_code_output(decision: &Decision) -> Value {
                 "permissionDecisionReason": "Allowed by bashguard rules"
             }
         }),
-        Decision::Deny { message } => serde_json::json!({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": message
-            }
-        }),
-        Decision::Prompt { message } => serde_json::json!({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "ask",
-                "permissionDecisionReason": message
-            }
-        }),
+        Decision::Deny {
+            message,
+            match_info,
+        } => {
+            let reason = match match_info {
+                Some(info) => info.format_error(command, message),
+                None => message.clone(),
+            };
+            serde_json::json!({
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": reason
+                }
+            })
+        }
+        Decision::Prompt {
+            message,
+            match_info,
+        } => {
+            let reason = match match_info {
+                Some(info) => info.format_error(command, message),
+                None => message.clone(),
+            };
+            serde_json::json!({
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "ask",
+                    "permissionDecisionReason": reason
+                }
+            })
+        }
     }
 }
 
-fn format_opencode_output(decision: &Decision) -> Value {
+fn format_opencode_output(decision: &Decision, command: &str) -> Value {
     match decision {
         Decision::Allow => serde_json::json!({ "allow": true }),
-        Decision::Deny { message } => serde_json::json!({ "abort": message }),
-        Decision::Prompt { message } => serde_json::json!({
-            "abort": format!("[Requires approval] {}", message)
-        }),
+        Decision::Deny {
+            message,
+            match_info,
+        } => {
+            let reason = match match_info {
+                Some(info) => info.format_error(command, message),
+                None => message.clone(),
+            };
+            serde_json::json!({ "abort": reason })
+        }
+        Decision::Prompt {
+            message,
+            match_info,
+        } => {
+            let reason = match match_info {
+                Some(info) => info.format_error(command, message),
+                None => message.clone(),
+            };
+            serde_json::json!({
+                "abort": format!("[Requires approval] {}", reason)
+            })
+        }
     }
 }
 
@@ -165,11 +221,41 @@ fn test(args: cli::test::Args) -> Result<()> {
         }
     }
 
-    println!("\nOverall Decision: {:?}", decision);
+    println!(
+        "\nDecision: {}",
+        match &decision {
+            Decision::Allow => "ALLOW".to_string(),
+            Decision::Deny {
+                message,
+                match_info,
+            } => {
+                let mut output = "DENY\n".to_string();
+                if let Some(info) = match_info {
+                    output.push_str(&info.format_error(&command, message));
+                } else {
+                    output.push_str(message);
+                }
+                output
+            }
+            Decision::Prompt {
+                message,
+                match_info,
+            } => {
+                let mut output = "PROMPT\n".to_string();
+                if let Some(info) = match_info {
+                    output.push_str(&info.format_error(&command, message));
+                } else {
+                    output.push_str(message);
+                }
+                output
+            }
+        }
+    );
+
     if let Some(rule) = matched_rule {
-        println!("Matched rule: {:?}", rule);
+        println!("\nMatched rule: {:?}", rule);
     } else {
-        println!("Matched rule: (default action)");
+        println!("\nMatched rule: (default action)");
     }
 
     Ok(())

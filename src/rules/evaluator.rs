@@ -1,16 +1,37 @@
-use super::matcher::RuleMatcher;
+use super::matcher::{MatchInfo, RuleMatcher};
 use crate::{
     config::{Action, Config, Rule},
     parser::ParsedCommand,
 };
 
 /// The decision made about a command
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum Decision {
     Allow,
-    Deny { message: String },
-    Prompt { message: String },
+    Deny {
+        message: String,
+        match_info: Option<MatchInfo>,
+    },
+    Prompt {
+        message: String,
+        match_info: Option<MatchInfo>,
+    },
 }
+
+impl PartialEq for Decision {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Decision::Allow, Decision::Allow) => true,
+            (Decision::Deny { message: m1, .. }, Decision::Deny { message: m2, .. }) => m1 == m2,
+            (Decision::Prompt { message: m1, .. }, Decision::Prompt { message: m2, .. }) => {
+                m1 == m2
+            }
+            _ => false,
+        }
+    }
+}
+
+impl Eq for Decision {}
 
 /// Evaluates commands against rules
 pub struct Evaluator<'a> {
@@ -80,16 +101,22 @@ impl<'a> Evaluator<'a> {
     fn evaluate_single_with_trace(&self, command: &ParsedCommand) -> (Decision, Option<Rule>) {
         // First, check custom rules from config (highest priority)
         for rule in &self.config.rules {
-            if RuleMatcher::matches(rule, command) {
-                return (Self::make_decision(rule), Some(rule.clone()));
+            if let Some(match_info) = RuleMatcher::matches_with_info(rule, command) {
+                return (
+                    Self::make_decision(rule, Some(match_info)),
+                    Some(rule.clone()),
+                );
             }
         }
 
         // Then, check profile rules (in order of profiles)
         for profile in &self.config.loaded_profiles {
             for rule in &profile.rules {
-                if RuleMatcher::matches(rule, command) {
-                    return (Self::make_decision(rule), Some(rule.clone()));
+                if let Some(match_info) = RuleMatcher::matches_with_info(rule, command) {
+                    return (
+                        Self::make_decision(rule, Some(match_info)),
+                        Some(rule.clone()),
+                    );
                 }
             }
         }
@@ -99,16 +126,18 @@ impl<'a> Evaluator<'a> {
             Action::Allow => Decision::Allow,
             Action::Deny => Decision::Deny {
                 message: "Blocked by default policy".to_string(),
+                match_info: None,
             },
             Action::Prompt => Decision::Prompt {
                 message: "No matching rule found".to_string(),
+                match_info: None,
             },
         };
 
         (decision, None)
     }
 
-    fn make_decision(rule: &Rule) -> Decision {
+    fn make_decision(rule: &Rule, match_info: Option<MatchInfo>) -> Decision {
         match rule.action {
             Action::Allow => Decision::Allow,
             Action::Deny => Decision::Deny {
@@ -116,12 +145,14 @@ impl<'a> Evaluator<'a> {
                     .message
                     .clone()
                     .unwrap_or_else(|| "Blocked by rule".to_string()),
+                match_info,
             },
             Action::Prompt => Decision::Prompt {
                 message: rule
                     .message
                     .clone()
                     .unwrap_or_else(|| "Requires confirmation".to_string()),
+                match_info,
             },
         }
     }
@@ -189,7 +220,8 @@ mod tests {
         assert_eq!(
             decision,
             Decision::Deny {
-                message: "Push not allowed".to_string()
+                message: "Push not allowed".to_string(),
+                match_info: None,
             }
         );
     }
@@ -231,7 +263,8 @@ mod tests {
         assert_eq!(
             decision,
             Decision::Deny {
-                message: "Recursive delete blocked".to_string()
+                message: "Recursive delete blocked".to_string(),
+                match_info: None,
             }
         );
     }
@@ -308,7 +341,8 @@ mod tests {
         assert_eq!(
             decision,
             Decision::Deny {
-                message: "Blocked by default policy".to_string()
+                message: "Blocked by default policy".to_string(),
+                match_info: None,
             }
         );
     }
@@ -352,7 +386,8 @@ mod tests {
         assert_eq!(
             decision,
             Decision::Deny {
-                message: "rm blocked".to_string()
+                message: "rm blocked".to_string(),
+                match_info: None,
             }
         );
     }
@@ -380,7 +415,8 @@ mod tests {
         assert_eq!(
             decision,
             Decision::Deny {
-                message: "dangerous blocked".to_string()
+                message: "dangerous blocked".to_string(),
+                match_info: None,
             }
         );
     }

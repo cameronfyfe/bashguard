@@ -9,4 +9,4 @@ pub mod rules;
 pub use config::{Config, Profile, Settings};
 pub use logger::SessionLogger;
 pub use parser::ParsedCommand;
-pub use rules::{Decision, Evaluator};
+pub use rules::{Decision, Evaluator, MatchInfo, MatchReason};

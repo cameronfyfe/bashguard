@@ -2,16 +2,117 @@ use regex::Regex;
 
 use crate::{config::Rule, parser::ParsedCommand};
 
+/// Information about why a rule matched
+#[derive(Debug, Clone)]
+pub struct MatchInfo {
+    /// The reason the rule matched
+    pub reason: MatchReason,
+    /// Start position in the raw command string (byte offset)
+    pub span_start: usize,
+    /// End position in the raw command string (byte offset)
+    pub span_end: usize,
+}
+
+/// The specific reason a rule matched
+#[derive(Debug, Clone)]
+pub enum MatchReason {
+    /// Matched on program name
+    Program(String),
+    /// Matched on subcommands
+    Subcommands(Vec<String>),
+    /// Matched on a required flag being present
+    FlagPresent(String),
+    /// Matched on a forbidden flag being present
+    FlagAbsent(String),
+    /// Matched on args substring
+    ArgsMatch(String),
+    /// Matched on args regex
+    ArgsRegex(String),
+    /// Matched on working directory
+    WorkingDir(String),
+    /// Multiple conditions matched (reports the most specific one)
+    Multiple(Box<MatchInfo>),
+}
+
+impl MatchInfo {
+    /// Format the match info as a compiler-style error message
+    pub fn format_error(&self, raw_command: &str, message: &str) -> String {
+        let mut output = String::new();
+
+        // Line 1: The reason description (comes first so prefixing doesn't break alignment)
+        output.push_str(&self.reason_description());
+        output.push('\n');
+
+        // Line 2: The rule message (if custom)
+        if !message.is_empty() && message != "Blocked by rule" {
+            output.push_str("  ");
+            output.push_str(message);
+            output.push('\n');
+        }
+
+        // Line 3: The full command (indented)
+        output.push_str("\n  ");
+        output.push_str(raw_command);
+        output.push('\n');
+
+        // Line 4: Underline pointing to the problematic part (with 2-space indent to match command)
+        let spaces = " ".repeat(self.span_start + 2);
+        let underline_len = (self.span_end - self.span_start).max(1);
+        let underline = "^".repeat(underline_len);
+        output.push_str(&spaces);
+        output.push_str(&underline);
+
+        output
+    }
+
+    fn reason_description(&self) -> String {
+        match &self.reason {
+            MatchReason::Program(name) => format!("program '{}' is not allowed", name),
+            MatchReason::Subcommands(subs) => {
+                format!("subcommand '{}' is not allowed", subs.join(" "))
+            }
+            MatchReason::FlagPresent(flag) => format!("flag '{}' is not allowed", flag),
+            MatchReason::FlagAbsent(flag) => format!("missing required flag '{}'", flag),
+            MatchReason::ArgsMatch(pattern) => {
+                format!("argument matches blocked pattern '{}'", pattern)
+            }
+            MatchReason::ArgsRegex(pattern) => {
+                format!("argument matches blocked regex '{}'", pattern)
+            }
+            MatchReason::WorkingDir(pattern) => {
+                format!("working directory matches blocked pattern '{}'", pattern)
+            }
+            MatchReason::Multiple(inner) => inner.reason_description(),
+        }
+    }
+}
+
 /// Matches rules against parsed commands
 pub struct RuleMatcher;
 
 impl RuleMatcher {
     /// Check if a rule matches a parsed command
     pub fn matches(rule: &Rule, command: &ParsedCommand) -> bool {
+        Self::matches_with_info(rule, command).is_some()
+    }
+
+    /// Check if a rule matches and return information about what matched
+    pub fn matches_with_info(rule: &Rule, command: &ParsedCommand) -> Option<MatchInfo> {
+        // Track the most specific match reason (we'll use the last one that matches)
+        let mut match_info: Option<MatchInfo> = None;
+
         // Check program
         if let Some(ref program) = rule.program {
             if command.program != *program {
-                return false;
+                return None;
+            }
+            // Find program position in raw command
+            if let Some(pos) = command.raw.find(&command.program) {
+                match_info = Some(MatchInfo {
+                    reason: MatchReason::Program(program.clone()),
+                    span_start: pos,
+                    span_end: pos + command.program.len(),
+                });
             }
         }
 
@@ -20,17 +121,27 @@ impl RuleMatcher {
             if rule.subcommands_exact {
                 // Exact match: command subcommands must equal rule subcommands
                 if command.subcommands != rule.subcommands {
-                    return false;
+                    return None;
                 }
             } else {
                 // Prefix match: command subcommands must start with rule subcommands
                 if command.subcommands.len() < rule.subcommands.len() {
-                    return false;
+                    return None;
                 }
                 for (i, subcmd) in rule.subcommands.iter().enumerate() {
                     if command.subcommands.get(i) != Some(subcmd) {
-                        return false;
+                        return None;
                     }
+                }
+            }
+            // Find subcommand position - look for the last subcommand in the rule
+            if let Some(last_subcmd) = rule.subcommands.last() {
+                if let Some(pos) = command.raw.find(last_subcmd) {
+                    match_info = Some(MatchInfo {
+                        reason: MatchReason::Subcommands(rule.subcommands.clone()),
+                        span_start: pos,
+                        span_end: pos + last_subcmd.len(),
+                    });
                 }
             }
         }
@@ -38,14 +149,22 @@ impl RuleMatcher {
         // Check flags_present
         for flag in &rule.flags_present {
             if !command.flags.contains(flag) {
-                return false;
+                return None;
+            }
+            // Find flag position in raw command
+            if let Some(pos) = command.raw.find(flag.as_str()) {
+                match_info = Some(MatchInfo {
+                    reason: MatchReason::FlagPresent(flag.clone()),
+                    span_start: pos,
+                    span_end: pos + flag.len(),
+                });
             }
         }
 
-        // Check flags_absent
+        // Check flags_absent - rule doesn't match if any of these flags are present
         for flag in &rule.flags_absent {
             if command.flags.contains(flag) {
-                return false;
+                return None;
             }
         }
 
@@ -53,7 +172,15 @@ impl RuleMatcher {
         if let Some(ref pattern) = rule.args_match {
             let args_str = command.args.join(" ");
             if !args_str.contains(pattern) {
-                return false;
+                return None;
+            }
+            // Find the pattern in the raw command
+            if let Some(pos) = command.raw.find(pattern.as_str()) {
+                match_info = Some(MatchInfo {
+                    reason: MatchReason::ArgsMatch(pattern.clone()),
+                    span_start: pos,
+                    span_end: pos + pattern.len(),
+                });
             }
         }
 
@@ -62,13 +189,23 @@ impl RuleMatcher {
             let args_str = command.args.join(" ");
             match Regex::new(pattern) {
                 Ok(re) => {
-                    if !re.is_match(&args_str) {
-                        return false;
+                    if let Some(m) = re.find(&args_str) {
+                        // Find this match in the raw command
+                        let matched_text = m.as_str();
+                        if let Some(pos) = command.raw.find(matched_text) {
+                            match_info = Some(MatchInfo {
+                                reason: MatchReason::ArgsRegex(pattern.clone()),
+                                span_start: pos,
+                                span_end: pos + matched_text.len(),
+                            });
+                        }
+                    } else {
+                        return None;
                     }
                 }
                 Err(_) => {
                     // Invalid regex, don't match
-                    return false;
+                    return None;
                 }
             }
         }
@@ -80,17 +217,33 @@ impl RuleMatcher {
                 match glob::Pattern::new(pattern) {
                     Ok(glob) => {
                         if !glob.matches(&cwd_str) {
-                            return false;
+                            return None;
                         }
+                        // Working dir matches - point to the whole command since
+                        // the issue is the context, not a specific part
+                        match_info = Some(MatchInfo {
+                            reason: MatchReason::WorkingDir(pattern.clone()),
+                            span_start: 0,
+                            span_end: command.raw.len(),
+                        });
                     }
                     Err(_) => {
-                        return false;
+                        return None;
                     }
                 }
             }
         }
 
-        true
+        // If we got here, all conditions matched
+        // Return match_info, or create a default one pointing to the program
+        match_info.or_else(|| {
+            // Default: point to the program name
+            command.raw.find(&command.program).map(|pos| MatchInfo {
+                reason: MatchReason::Program(command.program.clone()),
+                span_start: pos,
+                span_end: pos + command.program.len(),
+            })
+        })
     }
 }
 

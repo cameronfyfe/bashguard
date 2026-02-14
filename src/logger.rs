@@ -92,8 +92,8 @@ impl SessionLogger {
 
         let (decision_str, reason) = match decision {
             Decision::Allow => ("allow".to_string(), None),
-            Decision::Deny { message } => ("deny".to_string(), Some(message.clone())),
-            Decision::Prompt { message } => ("prompt".to_string(), Some(message.clone())),
+            Decision::Deny { message, .. } => ("deny".to_string(), Some(message.clone())),
+            Decision::Prompt { message, .. } => ("prompt".to_string(), Some(message.clone())),
         };
 
         let entry = LogEntry {
