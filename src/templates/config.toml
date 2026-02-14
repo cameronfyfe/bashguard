@@ -1,13 +1,4 @@
 # Bashguard configuration
-# See: https://github.com/cameronfyfe/bashguard
-
-[profiles]
-# Built-in profiles to activate (run `bashguard profiles install-builtins` first)
-# Examples: "git/read-only", "docker/read-only", "kubectl/read-only"
-builtins = ["general/safe-basics"]
-
-# Custom profile files (relative to ~/.config/bashguard/profiles/)
-custom = []
 
 [settings]
 # Default action for commands that don't match any rule
@@ -17,7 +8,16 @@ default_action = "prompt"
 # Log all decisions to .bashguard/logs/
 log_decisions = true
 
-# Inline rules (highest priority, evaluated before profiles)
+# Global capability policies
+# Format: "<capability>" = "<action>" where action is allow/deny/prompt
+[capabilities]
+# "git.read-local" = "allow"
+# "git.write-local" = "prompt"
+# "git.pull" = "allow"
+# "git.push" = "prompt"
+# "git.force_push" = "deny"
+
+# Optional inline rules (applied after capability deny checks)
 # [[rules]]
 # program = "rm"
 # flags_present = ["-rf"]

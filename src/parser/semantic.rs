@@ -1,4 +1,10 @@
-use std::collections::HashSet;
+use std::{
+    collections::{HashMap, HashSet},
+    fs,
+    path::PathBuf,
+};
+
+use crate::cmd_map::{CmdCapability, CmdMap};
 
 /// Known programs and their subcommand patterns
 #[derive(Debug)]
@@ -6,99 +12,23 @@ struct ProgramInfo {
     /// Maximum depth of subcommands (e.g., git remote add = 2)
     max_subcommand_depth: usize,
     /// Known subcommands for this program
-    known_subcommands: HashSet<&'static str>,
+    known_subcommands: HashSet<String>,
+    /// Optional command map tree used for capability tagging
+    cmd_map: Option<CmdMap>,
 }
 
 /// Semantic analyzer that extracts structured information from commands
 pub struct SemanticAnalyzer {
-    programs: std::collections::HashMap<&'static str, ProgramInfo>,
+    programs: HashMap<&'static str, ProgramInfo>,
 }
-
-// TODO: Move subcommand catalogging to dynamic config files that can be updated separately
-//
-//       Or even better is find OSS project that maintains semantic databases for CLI tools
-//       or tools for generating them from man pages or help output.
 
 impl SemanticAnalyzer {
     pub fn new() -> Self {
-        let mut programs = std::collections::HashMap::new();
+        let mut programs = HashMap::new();
 
-        // Git has many subcommands, some nested (remote add, remote remove, etc.)
-        programs.insert(
-            "git",
-            ProgramInfo {
-                max_subcommand_depth: 2,
-                known_subcommands: [
-                    // Top-level subcommands
-                    "add",
-                    "am",
-                    "archive",
-                    "bisect",
-                    "blame",
-                    "branch",
-                    "bundle",
-                    "checkout",
-                    "cherry",
-                    "cherry-pick",
-                    "citool",
-                    "clean",
-                    "clone",
-                    "commit",
-                    "config",
-                    "describe",
-                    "diff",
-                    "difftool",
-                    "fetch",
-                    "format-patch",
-                    "gc",
-                    "grep",
-                    "gui",
-                    "help",
-                    "init",
-                    "log",
-                    "merge",
-                    "mergetool",
-                    "mv",
-                    "notes",
-                    "pull",
-                    "push",
-                    "rebase",
-                    "reflog",
-                    "remote",
-                    "reset",
-                    "restore",
-                    "revert",
-                    "rm",
-                    "shortlog",
-                    "show",
-                    "stash",
-                    "status",
-                    "submodule",
-                    "switch",
-                    "tag",
-                    "worktree",
-                    // Nested subcommands (under remote, stash, etc.)
-                    "set-url",
-                    "get-url",
-                    "show-ref",
-                    "update-ref",
-                    "apply",
-                    "drop",
-                    "list",
-                    "pop",
-                    "save",
-                    "clear",
-                    "prune",
-                    "update",
-                    "set-head",
-                    "rename",
-                    "remove",
-                ]
-                .iter()
-                .copied()
-                .collect(),
-            },
-        );
+        if let Some(cmd_map) = Self::load_cmd_map("git") {
+            programs.insert("git", Self::program_info_from_cmd_map(cmd_map));
+        }
 
         // Docker and docker compose
         programs.insert(
@@ -185,8 +115,9 @@ impl SemanticAnalyzer {
                     "unpause",
                 ]
                 .iter()
-                .copied()
+                .map(|s| s.to_string())
                 .collect(),
+                cmd_map: None,
             },
         );
 
@@ -266,8 +197,9 @@ impl SemanticAnalyzer {
                     "resume",
                 ]
                 .iter()
-                .copied()
+                .map(|s| s.to_string())
                 .collect(),
+                cmd_map: None,
             },
         );
 
@@ -319,8 +251,9 @@ impl SemanticAnalyzer {
                     "schema",
                 ]
                 .iter()
-                .copied()
+                .map(|s| s.to_string())
                 .collect(),
+                cmd_map: None,
             },
         );
 
@@ -369,8 +302,9 @@ impl SemanticAnalyzer {
                     "yank",
                 ]
                 .iter()
-                .copied()
+                .map(|s| s.to_string())
                 .collect(),
+                cmd_map: None,
             },
         );
 
@@ -555,8 +489,9 @@ impl SemanticAnalyzer {
                     "show-tags",
                 ]
                 .iter()
-                .copied()
+                .map(|s| s.to_string())
                 .collect(),
+                cmd_map: None,
             },
         );
 
@@ -569,13 +504,36 @@ impl SemanticAnalyzer {
         program: &str,
         remaining: &[String],
     ) -> (Vec<String>, HashSet<String>, Vec<String>) {
+        let (subcommands, flags, args, _) = self.analyze_with_capabilities(program, remaining);
+        (subcommands, flags, args)
+    }
+
+    /// Analyze a command and extract subcommands, flags, args, and capability tags.
+    pub fn analyze_with_capabilities(
+        &self,
+        program: &str,
+        remaining: &[String],
+    ) -> (
+        Vec<String>,
+        HashSet<String>,
+        Vec<String>,
+        HashSet<CmdCapability>,
+    ) {
         let mut subcommands = Vec::new();
         let mut flags = HashSet::new();
         let mut args = Vec::new();
+        let mut capabilities: HashSet<CmdCapability> = HashSet::new();
 
         let program_info = self.programs.get(program);
         let max_depth = program_info.map(|p| p.max_subcommand_depth).unwrap_or(0);
         let known_subcommands = program_info.map(|p| &p.known_subcommands);
+        let mut current_cmd_map = program_info.and_then(|p| p.cmd_map.as_ref());
+        let mut active_cmd_maps: Vec<&CmdMap> = Vec::new();
+
+        if let Some(cmd_map) = current_cmd_map {
+            active_cmd_maps.push(cmd_map);
+            capabilities.extend(cmd_map.capabilities.iter().cloned());
+        }
 
         let mut in_subcommand_region = true;
         let mut subcommand_depth = 0;
@@ -586,12 +544,20 @@ impl SemanticAnalyzer {
                 in_subcommand_region = false;
                 Self::parse_flags(word, &mut flags);
             } else if in_subcommand_region && subcommand_depth < max_depth {
-                // Check if it's a known subcommand
-                let is_subcommand = known_subcommands
-                    .map(|sc| sc.contains(word.as_str()))
-                    .unwrap_or(false);
-
-                if is_subcommand {
+                if let Some(next_map) = current_cmd_map
+                    .and_then(|cmd_map| cmd_map.subcmds.iter().find(|subcmd| subcmd.cmd == *word))
+                {
+                    subcommands.push(word.clone());
+                    subcommand_depth += 1;
+                    capabilities.extend(next_map.capabilities.iter().cloned());
+                    active_cmd_maps.push(next_map);
+                    current_cmd_map = Some(next_map);
+                } else if current_cmd_map.is_none()
+                    && known_subcommands
+                        .map(|sc| sc.contains(word.as_str()))
+                        .unwrap_or(false)
+                {
+                    // Static subcommand catalog (programs not migrated to cmd_maps yet)
                     subcommands.push(word.clone());
                     subcommand_depth += 1;
                 } else {
@@ -605,7 +571,85 @@ impl SemanticAnalyzer {
             }
         }
 
-        (subcommands, flags, args)
+        for flag in &flags {
+            for cmd_map in &active_cmd_maps {
+                if let Some(additions) = cmd_map.flags_add_capabilities.get(flag) {
+                    capabilities.extend(additions.iter().cloned());
+                }
+                if let Some(removals) = cmd_map.flags_remove_capabilities.get(flag) {
+                    for capability in removals {
+                        capabilities.remove(capability);
+                    }
+                }
+            }
+        }
+
+        (subcommands, flags, args, capabilities)
+    }
+
+    fn load_cmd_map(program: &str) -> Option<CmdMap> {
+        let filename = format!("{program}.toml");
+        let mut paths = Vec::new();
+
+        if let Ok(custom_dir) = std::env::var("BASHGUARD_CMD_MAP_DIR") {
+            paths.push(PathBuf::from(custom_dir).join(&filename));
+        }
+        paths.push(PathBuf::from("cmd_maps").join(&filename));
+        paths.push(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("cmd_maps")
+                .join(&filename),
+        );
+
+        for path in paths {
+            let Ok(contents) = fs::read_to_string(&path) else {
+                continue;
+            };
+            let Ok(cmd_map) = toml::from_str::<CmdMap>(&contents) else {
+                continue;
+            };
+            if cmd_map.cmd == program {
+                return Some(cmd_map);
+            }
+        }
+
+        if program == "git" {
+            let embedded = include_str!("../../cmd_maps/git.toml");
+            if let Ok(cmd_map) = toml::from_str::<CmdMap>(embedded) {
+                if cmd_map.cmd == program {
+                    return Some(cmd_map);
+                }
+            }
+        }
+
+        None
+    }
+
+    fn program_info_from_cmd_map(cmd_map: CmdMap) -> ProgramInfo {
+        let mut known_subcommands = HashSet::new();
+        Self::collect_subcommands(&cmd_map, &mut known_subcommands);
+
+        ProgramInfo {
+            max_subcommand_depth: Self::max_subcommand_depth(&cmd_map),
+            known_subcommands,
+            cmd_map: Some(cmd_map),
+        }
+    }
+
+    fn collect_subcommands(cmd_map: &CmdMap, known_subcommands: &mut HashSet<String>) {
+        for subcmd in &cmd_map.subcmds {
+            known_subcommands.insert(subcmd.cmd.clone());
+            Self::collect_subcommands(subcmd, known_subcommands);
+        }
+    }
+
+    fn max_subcommand_depth(cmd_map: &CmdMap) -> usize {
+        cmd_map
+            .subcmds
+            .iter()
+            .map(|subcmd| 1 + Self::max_subcommand_depth(subcmd))
+            .max()
+            .unwrap_or(0)
     }
 
     fn parse_flags(word: &str, flags: &mut HashSet<String>) {
@@ -677,5 +721,29 @@ mod tests {
         assert!(subcmds.is_empty());
         assert!(flags.contains("-x"));
         assert_eq!(args, vec!["foo", "bar"]);
+    }
+
+    #[test]
+    fn test_git_push_force_capability() {
+        let analyzer = SemanticAnalyzer::new();
+        let (_, _, _, capabilities) =
+            analyzer.analyze_with_capabilities("git", &["push".to_string(), "--force".to_string()]);
+        assert!(capabilities.contains("git.push"));
+        assert!(capabilities.contains("git.force_push"));
+    }
+
+    #[test]
+    fn test_git_remote_add_capability() {
+        let analyzer = SemanticAnalyzer::new();
+        let (_, _, _, capabilities) = analyzer.analyze_with_capabilities(
+            "git",
+            &[
+                "remote".to_string(),
+                "add".to_string(),
+                "origin".to_string(),
+                "https://github.com/foo/bar".to_string(),
+            ],
+        );
+        assert!(capabilities.contains("git.write-local"));
     }
 }

@@ -1,6 +1,6 @@
 use clap::Parser;
 
-/// Test a command against current rules
+/// Test a command against current policy
 #[derive(Clone, Debug, Parser)]
 pub struct Args {
     /// The command to test

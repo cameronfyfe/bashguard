@@ -2,7 +2,7 @@ use clap::Parser;
 
 use crate::cli::Tool;
 
-/// Check a command against current rules (reads from stdin, used by hooks)
+/// Check a command against current policy (reads from stdin, used by hooks)
 #[derive(Clone, Debug, Parser)]
 pub struct Args {
     /// Output in JSON format

@@ -99,26 +99,57 @@ impl<'a> Evaluator<'a> {
 
     /// Internal method to evaluate a single command.
     fn evaluate_single_with_trace(&self, command: &ParsedCommand) -> (Decision, Option<Rule>) {
-        // First, check custom rules from config (highest priority)
+        let capability_policy = self.evaluate_capability_policies(command);
+
+        if let Some((Action::Deny, capability)) = capability_policy.as_ref() {
+            return (
+                Decision::Deny {
+                    message: format!("Blocked by global capability policy: {}", capability),
+                    match_info: None,
+                },
+                None,
+            );
+        }
+
+        // Then, check inline rules from config
         for rule in &self.config.rules {
             if let Some(match_info) = RuleMatcher::matches_with_info(rule, command) {
-                return (
-                    Self::make_decision(rule, Some(match_info)),
-                    Some(rule.clone()),
-                );
+                let decision = Self::make_decision(rule, Some(match_info));
+
+                if let Some((Action::Prompt, capability)) = capability_policy.as_ref() {
+                    if matches!(decision, Decision::Allow) {
+                        return (
+                            Decision::Prompt {
+                                message: format!(
+                                    "Requires confirmation by global capability policy: {}",
+                                    capability
+                                ),
+                                match_info: None,
+                            },
+                            Some(rule.clone()),
+                        );
+                    }
+                }
+
+                return (decision, Some(rule.clone()));
             }
         }
 
-        // Then, check profile rules (in order of profiles)
-        for profile in &self.config.loaded_profiles {
-            for rule in &profile.rules {
-                if let Some(match_info) = RuleMatcher::matches_with_info(rule, command) {
-                    return (
-                        Self::make_decision(rule, Some(match_info)),
-                        Some(rule.clone()),
-                    );
-                }
-            }
+        if let Some((Action::Prompt, capability)) = capability_policy.as_ref() {
+            return (
+                Decision::Prompt {
+                    message: format!(
+                        "Requires confirmation by global capability policy: {}",
+                        capability
+                    ),
+                    match_info: None,
+                },
+                None,
+            );
+        }
+
+        if let Some((Action::Allow, _)) = capability_policy.as_ref() {
+            return (Decision::Allow, None);
         }
 
         // Finally, use default action
@@ -135,6 +166,42 @@ impl<'a> Evaluator<'a> {
         };
 
         (decision, None)
+    }
+
+    fn evaluate_capability_policies(&self, command: &ParsedCommand) -> Option<(Action, String)> {
+        let mut matches: Vec<(&String, &Action)> = command
+            .capabilities
+            .iter()
+            .filter_map(|capability| {
+                self.config
+                    .capabilities
+                    .get(capability)
+                    .map(|action| (capability, action))
+            })
+            .collect();
+
+        if matches.is_empty() {
+            return None;
+        }
+
+        matches.sort_by(|(a, _), (b, _)| a.cmp(b));
+
+        if let Some((capability, _)) = matches
+            .iter()
+            .find(|(_, action)| matches!(action, Action::Deny))
+        {
+            return Some((Action::Deny, (*capability).clone()));
+        }
+
+        if let Some((capability, _)) = matches
+            .iter()
+            .find(|(_, action)| matches!(action, Action::Prompt))
+        {
+            return Some((Action::Prompt, (*capability).clone()));
+        }
+
+        let capability = matches[0].0.clone();
+        Some((Action::Allow, capability))
     }
 
     fn make_decision(rule: &Rule, match_info: Option<MatchInfo>) -> Decision {
@@ -160,19 +227,16 @@ impl<'a> Evaluator<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::*;
-    use crate::config::{Profile, ProfileMetadata, ProfilesConfig, Settings};
+    use crate::config::Settings;
 
     fn make_config_with_rules(rules: Vec<Rule>) -> Config {
         Config {
             settings: Settings::default(),
-            profiles: ProfilesConfig {
-                builtins: vec![],
-                custom: vec![],
-            },
+            capabilities: HashMap::new(),
             rules,
-            loaded_profiles: vec![],
-            available_profiles: vec![],
         }
     }
 
@@ -227,111 +291,14 @@ mod tests {
     }
 
     #[test]
-    fn test_profile_rules() {
-        let config = Config {
-            settings: Settings::default(),
-            profiles: ProfilesConfig {
-                builtins: vec!["test".to_string()],
-                custom: vec![],
-            },
-            rules: vec![],
-            loaded_profiles: vec![Profile {
-                profile: ProfileMetadata {
-                    name: "test".to_string(),
-                    description: None,
-                },
-                rules: vec![Rule {
-                    program: Some("rm".to_string()),
-                    subcommands: vec![],
-                    subcommands_exact: false,
-                    args_match: None,
-                    args_regex: None,
-                    flags_present: vec!["-r".to_string()],
-                    flags_absent: vec![],
-                    working_dir: None,
-                    action: Action::Deny,
-                    message: Some("Recursive delete blocked".to_string()),
-                }],
-            }],
-            available_profiles: vec![],
-        };
-
-        let cmds = ParsedCommand::parse_all("rm -rf /tmp/foo").unwrap();
-        let evaluator = Evaluator::new(&config);
-        let decision = evaluator.evaluate_all(&cmds);
-
-        assert_eq!(
-            decision,
-            Decision::Deny {
-                message: "Recursive delete blocked".to_string(),
-                match_info: None,
-            }
-        );
-    }
-
-    #[test]
-    fn test_custom_rules_override_profiles() {
-        let config = Config {
-            settings: Settings::default(),
-            profiles: ProfilesConfig {
-                builtins: vec![],
-                custom: vec![],
-            },
-            rules: vec![Rule {
-                program: Some("git".to_string()),
-                subcommands: vec!["push".to_string()],
-                subcommands_exact: false,
-                args_match: None,
-                args_regex: None,
-                flags_present: vec![],
-                flags_absent: vec![],
-                working_dir: None,
-                action: Action::Allow,
-                message: None,
-            }],
-            loaded_profiles: vec![Profile {
-                profile: ProfileMetadata {
-                    name: "test".to_string(),
-                    description: None,
-                },
-                rules: vec![Rule {
-                    program: Some("git".to_string()),
-                    subcommands: vec!["push".to_string()],
-                    subcommands_exact: false,
-                    args_match: None,
-                    args_regex: None,
-                    flags_present: vec![],
-                    flags_absent: vec![],
-                    working_dir: None,
-                    action: Action::Deny,
-                    message: Some("Blocked by profile".to_string()),
-                }],
-            }],
-            available_profiles: vec![],
-        };
-
-        let cmds = ParsedCommand::parse_all("git push").unwrap();
-        let evaluator = Evaluator::new(&config);
-        let decision = evaluator.evaluate_all(&cmds);
-
-        // Custom rule should take precedence
-        assert_eq!(decision, Decision::Allow);
-    }
-
-    #[test]
     fn test_default_action() {
         let config = Config {
             settings: Settings {
                 default_action: Action::Deny,
                 log_decisions: false,
             },
-            profiles: ProfilesConfig {
-                builtins: vec![],
-                custom: vec![],
-            },
+            capabilities: HashMap::new(),
             rules: vec![],
-            loaded_profiles: vec![],
-            available_profiles: vec![],
         };
 
         let cmds = ParsedCommand::parse_all("some-unknown-command").unwrap();
@@ -416,6 +383,87 @@ mod tests {
             decision,
             Decision::Deny {
                 message: "dangerous blocked".to_string(),
+                match_info: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_global_capability_deny() {
+        let mut config = make_config_with_rules(vec![]);
+        config.settings.default_action = Action::Allow;
+        config
+            .capabilities
+            .insert("git.force_push".to_string(), Action::Deny);
+
+        let cmds = ParsedCommand::parse_all("git push --force origin main").unwrap();
+        let evaluator = Evaluator::new(&config);
+        let decision = evaluator.evaluate_all(&cmds);
+
+        assert_eq!(
+            decision,
+            Decision::Deny {
+                message: "Blocked by global capability policy: git.force_push".to_string(),
+                match_info: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_global_capability_prompt() {
+        let mut config = make_config_with_rules(vec![]);
+        config.settings.default_action = Action::Allow;
+        config
+            .capabilities
+            .insert("git.push".to_string(), Action::Prompt);
+
+        let cmds = ParsedCommand::parse_all("git push origin main").unwrap();
+        let evaluator = Evaluator::new(&config);
+        let decision = evaluator.evaluate_all(&cmds);
+
+        assert_eq!(
+            decision,
+            Decision::Prompt {
+                message: "Requires confirmation by global capability policy: git.push".to_string(),
+                match_info: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_global_capability_allow_overrides_default_deny() {
+        let mut config = make_config_with_rules(vec![]);
+        config.settings.default_action = Action::Deny;
+        config
+            .capabilities
+            .insert("git.read-local".to_string(), Action::Allow);
+
+        let cmds = ParsedCommand::parse_all("git status").unwrap();
+        let evaluator = Evaluator::new(&config);
+        let decision = evaluator.evaluate_all(&cmds);
+
+        assert_eq!(decision, Decision::Allow);
+    }
+
+    #[test]
+    fn test_global_capability_deny_precedence_over_allow() {
+        let mut config = make_config_with_rules(vec![]);
+        config.settings.default_action = Action::Allow;
+        config
+            .capabilities
+            .insert("git.push".to_string(), Action::Allow);
+        config
+            .capabilities
+            .insert("git.force_push".to_string(), Action::Deny);
+
+        let cmds = ParsedCommand::parse_all("git push --force origin main").unwrap();
+        let evaluator = Evaluator::new(&config);
+        let decision = evaluator.evaluate_all(&cmds);
+
+        assert_eq!(
+            decision,
+            Decision::Deny {
+                message: "Blocked by global capability policy: git.force_push".to_string(),
                 match_info: None,
             }
         );

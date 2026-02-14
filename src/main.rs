@@ -12,7 +12,6 @@ use clap::Parser;
 use serde_json::Value;
 
 mod init;
-mod profiles;
 
 fn main() {
     let cli = Cli::parse();
@@ -21,7 +20,6 @@ fn main() {
         Command::Init(args) => init::init(args),
         Command::Check(args) => check(args),
         Command::Validate(args) => validate(args),
-        Command::Profiles(args) => profiles(args),
         Command::Test(args) => test(args),
     };
 
@@ -114,7 +112,7 @@ fn format_claude_code_output(decision: &Decision, command: &str) -> Value {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "allow",
-                "permissionDecisionReason": "Allowed by bashguard rules"
+                "permissionDecisionReason": "Allowed by bashguard policy"
             }
         }),
         Decision::Deny {
@@ -188,12 +186,6 @@ fn validate(args: cli::validate::Args) -> Result<()> {
     println!("Configuration is valid.");
 
     Ok(())
-}
-
-fn profiles(args: cli::profiles::Args) -> Result<()> {
-    match args.command {
-        cli::profiles::Command::InstallBuiltins(args) => profiles::install_builtins(args),
-    }
 }
 
 fn test(args: cli::test::Args) -> Result<()> {

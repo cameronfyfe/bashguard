@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 /// The main configuration structure
@@ -6,41 +8,13 @@ pub struct Config {
     #[serde(default)]
     pub settings: Settings,
 
+    /// Global capability policies (capability -> action)
+    /// Example: "git.force_push" = "deny"
     #[serde(default)]
-    pub profiles: ProfilesConfig,
+    pub capabilities: HashMap<String, Action>,
 
     #[serde(default)]
     pub rules: Vec<Rule>,
-
-    /// Loaded profile data (populated by loader)
-    #[serde(skip)]
-    pub loaded_profiles: Vec<Profile>,
-
-    /// All available profiles (populated by loader)
-    #[serde(skip)]
-    pub available_profiles: Vec<ProfileMetadata>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct ProfilesConfig {
-    #[serde(default)]
-    pub builtins: Vec<String>,
-
-    #[serde(default)]
-    pub custom: Vec<String>,
-}
-
-impl Config {
-    /// Get list of available profiles
-    pub fn available_profiles(&self) -> &[ProfileMetadata] {
-        &self.available_profiles
-    }
-
-    /// Check if a profile is currently active
-    pub fn is_profile_active(&self, name: &str) -> bool {
-        self.profiles.builtins.iter().any(|p| p == name)
-            || self.profiles.custom.iter().any(|p| p == name)
-    }
 }
 
 /// Global settings
@@ -118,26 +92,4 @@ pub enum Action {
     Allow,
     Deny,
     Prompt,
-}
-
-/// A profile containing a set of rules
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct Profile {
-    #[serde(default)]
-    pub profile: ProfileMetadata,
-
-    #[serde(default)]
-    pub rules: Vec<Rule>,
-}
-
-/// Profile metadata
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct ProfileMetadata {
-    /// Profile name (e.g., "git/read-only")
-    #[serde(default)]
-    pub name: String,
-
-    /// Profile description
-    #[serde(default)]
-    pub description: Option<String>,
 }

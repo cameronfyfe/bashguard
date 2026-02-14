@@ -49,8 +49,8 @@ pub fn init(args: cli::init::Args) -> Result<()> {
 
     println!("\nBashguard initialized successfully for {tool}!");
     println!("\nNext steps:");
-    println!("  1. Install built-in profiles: bashguard profiles install-builtins");
-    println!("  2. Edit .bashguard/config.toml to configure rules");
+    println!("  1. Edit .bashguard/config.toml to configure capability policies");
+    println!("  2. Run `bashguard test --command \"git status\"` to verify behavior");
 
     Ok(())
 }

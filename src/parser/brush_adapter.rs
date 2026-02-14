@@ -44,11 +44,15 @@ pub fn parse_with_brush(input: &str) -> Result<Vec<ParsedCommand>> {
 /// Context for command extraction, carrying the original input
 struct ExtractionContext<'a> {
     input: &'a str,
+    analyzer: SemanticAnalyzer,
 }
 
 impl<'a> ExtractionContext<'a> {
     fn new(input: &'a str) -> Self {
-        Self { input }
+        Self {
+            input,
+            analyzer: SemanticAnalyzer::new(),
+        }
     }
 }
 
@@ -265,8 +269,8 @@ fn extract_simple_command(
     let program = words[0].clone();
     let remaining: Vec<String> = words[1..].to_vec();
 
-    let analyzer = SemanticAnalyzer::new();
-    let (subcommands, flags, args) = analyzer.analyze(&program, &remaining);
+    let (subcommands, flags, args, capabilities) =
+        ctx.analyzer.analyze_with_capabilities(&program, &remaining);
 
     Ok(Some(ParsedCommand {
         raw: ctx.input.to_string(),
@@ -274,6 +278,7 @@ fn extract_simple_command(
         subcommands,
         args,
         flags,
+        capabilities,
         is_piped,
         has_redirect,
         env_vars,
@@ -433,6 +438,14 @@ mod tests {
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].program, "git");
         assert_eq!(results[0].subcommands, vec!["remote", "add"]);
+    }
+
+    #[test]
+    fn test_git_push_force_capability() {
+        let results = parse_with_brush("git push --force origin main").unwrap();
+        assert_eq!(results.len(), 1);
+        assert!(results[0].capabilities.contains("git.push"));
+        assert!(results[0].capabilities.contains("git.force_push"));
     }
 
     #[test]

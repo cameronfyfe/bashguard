@@ -1,0 +1,258 @@
+cmd = "git"
+
+[[subcmds]]
+cmd = "add"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "am"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "apply"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "archive"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "bisect"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "blame"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "branch"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "bundle"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "checkout"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "cherry"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "cherry-pick"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "citool"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "clean"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "clone"
+capabilities = ["git.pull", "git.write-local"]
+
+[[subcmds]]
+cmd = "commit"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "config"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "describe"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "diff"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "difftool"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "fetch"
+capabilities = ["git.pull"]
+
+[[subcmds]]
+cmd = "format-patch"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "gc"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "grep"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "gui"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "help"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "init"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "log"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "merge"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "mergetool"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "mv"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "notes"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "pull"
+capabilities = ["git.pull", "git.write-local"]
+
+[[subcmds]]
+cmd = "push"
+capabilities = ["git.push"]
+flags_add_capabilities = { "-f" = ["git.force_push"], "--force" = ["git.force_push"], "--force-with-lease" = ["git.force_push"] }
+
+[[subcmds]]
+cmd = "rebase"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "reflog"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "remote"
+capabilities = ["git.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "add"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "get-url"
+capabilities = ["git.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "set-url"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "set-head"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "rename"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "remove"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "prune"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "update"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "reset"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "restore"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "revert"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "rm"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "shortlog"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "show"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "show-ref"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "stash"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "apply"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "drop"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "list"
+capabilities = ["git.read-local"]
+
+[[subcmds.subcmds]]
+cmd = "pop"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "save"
+capabilities = ["git.write-local"]
+
+[[subcmds.subcmds]]
+cmd = "clear"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "status"
+capabilities = ["git.read-local"]
+
+[[subcmds]]
+cmd = "submodule"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "switch"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "tag"
+capabilities = ["git.read-local", "git.write-local"]
+
+[[subcmds]]
+cmd = "update-ref"
+capabilities = ["git.write-local"]
+
+[[subcmds]]
+cmd = "worktree"
+capabilities = ["git.write-local"]

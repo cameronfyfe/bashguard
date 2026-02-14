@@ -17,6 +17,8 @@ pub struct ParsedCommand {
     pub args: Vec<String>,
     /// Flags (both short and long, e.g., "-f", "--force")
     pub flags: HashSet<String>,
+    /// Derived capability tags from command map metadata
+    pub capabilities: HashSet<String>,
     /// Whether the command contains a pipe
     pub is_piped: bool,
     /// Whether the command has output redirection
