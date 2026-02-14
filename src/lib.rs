@@ -7,6 +7,7 @@ pub mod logger;
 pub mod parser;
 pub mod rules;
 
+pub use cmd_map::{get_all_capabilities, get_all_capabilities_flat};
 pub use config::{Config, Settings};
 pub use logger::SessionLogger;
 pub use parser::ParsedCommand;

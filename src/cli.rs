@@ -2,6 +2,7 @@ use std::{fmt, str::FromStr};
 
 use clap::{Parser, Subcommand};
 
+pub mod capabilities;
 pub mod check;
 pub mod init;
 pub mod test;
@@ -21,6 +22,7 @@ pub enum Command {
     Check(check::Args),
     Validate(validate::Args),
     Test(test::Args),
+    Capabilities(capabilities::Args),
 }
 
 #[derive(Clone, Debug)]

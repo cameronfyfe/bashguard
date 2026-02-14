@@ -6,7 +6,8 @@ use std::{
 use anyhow::{Context, Result};
 use bashguard::{
     cli::{self, Cli, Command},
-    Config, Decision, Evaluator, ParsedCommand, SessionLogger,
+    get_all_capabilities, get_all_capabilities_flat, Config, Decision, Evaluator, ParsedCommand,
+    SessionLogger,
 };
 use clap::Parser;
 use serde_json::Value;
@@ -21,6 +22,7 @@ fn main() {
         Command::Check(args) => check(args),
         Command::Validate(args) => validate(args),
         Command::Test(args) => test(args),
+        Command::Capabilities(args) => capabilities(args),
     };
 
     if let Err(e) = result {
@@ -251,4 +253,68 @@ fn test(args: cli::test::Args) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn capabilities(args: cli::capabilities::Args) -> Result<()> {
+    let cli::capabilities::Args { format } = args;
+
+    let all_caps = get_all_capabilities();
+
+    match format.as_str() {
+        "toml" => {
+            let flat_caps = get_all_capabilities_flat();
+            println!("[capabilities]");
+            println!("# Safe read-only operations - allowed by default");
+            for cap in &flat_caps {
+                if is_safe_capability(cap) {
+                    println!("\"{}\" = \"allow\"", cap);
+                }
+            }
+            println!();
+            println!("# Operations that modify state - uncomment to allow");
+            for cap in &flat_caps {
+                if !is_safe_capability(cap) {
+                    println!("# \"{}\" = \"allow\"", cap);
+                }
+            }
+        }
+        _ => {
+            // text format - grouped by command
+            for (cmd, caps) in &all_caps {
+                println!("{}:", cmd);
+                for cap in caps {
+                    let safety = if is_safe_capability(cap) {
+                        " (safe)"
+                    } else {
+                        ""
+                    };
+                    println!("  - {}{}", cap, safety);
+                }
+                println!();
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Determine if a capability is considered "safe" (read-only, non-destructive)
+fn is_safe_capability(cap: &str) -> bool {
+    // Read-only operations
+    if cap.ends_with(".read-local") || cap.ends_with(".read") {
+        return true;
+    }
+
+    // Specific safe capabilities
+    matches!(
+        cap,
+        "fs.read"
+            | "git.read-local"
+            | "cargo.read-local"
+            | "cargo.build"
+            | "kubectl.read-local"
+            | "terraform.read-local"
+            | "docker.read-local"
+            | "az.read"
+    )
 }

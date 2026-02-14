@@ -10,12 +10,73 @@ log_decisions = true
 
 # Global capability policies
 # Format: "<capability>" = "<action>" where action is allow/deny/prompt
+#
+# Run `bashguard capabilities` to see all available capabilities
+# Run `bashguard capabilities --format toml` to get a copy-pasteable list
+
 [capabilities]
-# "git.read-local" = "allow"
-# "git.write-local" = "prompt"
-# "git.pull" = "allow"
-# "git.push" = "prompt"
+# Safe read-only operations - allowed by default
+"az.read" = "allow"
+"cargo.build" = "allow"
+"cargo.read-local" = "allow"
+"docker.read-local" = "allow"
+"fs.read" = "allow"
+"git.read-local" = "allow"
+"kubectl.read-local" = "allow"
+"terraform.read-local" = "allow"
+
+# Operations that modify state - uncomment to allow
+# "az.acr" = "allow"
+# "az.aks" = "allow"
+# "az.auth" = "allow"
+# "az.compute" = "allow"
+# "az.config" = "allow"
+# "az.cosmosdb" = "allow"
+# "az.delete" = "allow"
+# "az.iam" = "allow"
+# "az.keyvault" = "allow"
+# "az.monitor" = "allow"
+# "az.network" = "allow"
+# "az.sql" = "allow"
+# "az.storage" = "allow"
+# "az.write" = "allow"
+# "cargo.auth" = "allow"
+# "cargo.install" = "allow"
+# "cargo.publish" = "allow"
+# "cargo.run" = "allow"
+# "cargo.write-local" = "allow"
+# "docker.auth" = "allow"
+# "docker.build" = "allow"
+# "docker.compose" = "allow"
+# "docker.exec" = "allow"
+# "docker.lifecycle" = "allow"
+# "docker.mount" = "allow"
+# "docker.network" = "allow"
+# "docker.privileged" = "allow"
+# "docker.pull" = "allow"
+# "docker.push" = "allow"
+# "docker.run" = "allow"
+# "docker.volume" = "allow"
+# "docker.write-local" = "allow"
 # "git.force_push" = "deny"
+# "git.pull" = "allow"
+# "git.push" = "allow"
+# "git.write-local" = "allow"
+# "kubectl.auth" = "allow"
+# "kubectl.config" = "allow"
+# "kubectl.debug" = "allow"
+# "kubectl.delete" = "allow"
+# "kubectl.drain" = "allow"
+# "kubectl.exec" = "allow"
+# "kubectl.port-forward" = "allow"
+# "kubectl.write-local" = "allow"
+# "terraform.auth" = "allow"
+# "terraform.destroy" = "allow"
+# "terraform.init" = "allow"
+# "terraform.providers" = "allow"
+# "terraform.state" = "allow"
+# "terraform.workspace" = "allow"
+# "terraform.write-local" = "allow"
 
 # Optional inline rules (applied after capability deny checks)
 # [[rules]]
